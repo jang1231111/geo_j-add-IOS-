@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:geo_j/models/custom_error.dart';
-import 'package:geo_j/providers/signin_provider.dart';
-import 'package:geo_j/providers/signin_state.dart';
+import 'package:geo_j/pages/scan_page.dart';
+import 'package:geo_j/providers/signin/signin_provider.dart';
+import 'package:geo_j/providers/signin/signin_state.dart';
+import 'package:geo_j/utils/error_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:validators/validators.dart';
 
 class SigninPage extends StatefulWidget {
   const SigninPage({super.key});
@@ -16,7 +17,7 @@ class SigninPage extends StatefulWidget {
 class _SigninPageState extends State<SigninPage> {
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
-  String? _email, _password;
+  String? _phoneNumber;
 
   void _submit() async {
     setState(() {
@@ -31,14 +32,13 @@ class _SigninPageState extends State<SigninPage> {
 
     form.save();
 
-    print('email: $_email, password: $_password');
+    print('phoneNumber: $_phoneNumber');
 
     try {
-      // await context
-      //     .read<SigninProvider>()
-      //     .signin(email: _email!, password: _password!);
+      await context.read<SigninProvider>().signin(phoneNumber: _phoneNumber!);
+      Navigator.pushNamed(context, ScanPage.routeName);
     } on CustomError catch (e) {
-      // errorDialog(context, e);
+      errorDialog(context, e.toString());
     }
   }
 
@@ -69,8 +69,9 @@ class _SigninPageState extends State<SigninPage> {
                       height: 20.0,
                     ),
                     TextFormField(
-                      // keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.number,
                       autocorrect: false,
+                      maxLength: 11,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         filled: true,
@@ -85,8 +86,15 @@ class _SigninPageState extends State<SigninPage> {
                           return '전화번호는 11자리 전체를 입력해야 합니다.';
                         return null;
                       },
-                      onSaved: (String? value) {
-                        _email = value;
+                      onSaved: (String? inputPhoneNumber) {
+                        String phoneNumber = '';
+                        phoneNumber += inputPhoneNumber!.substring(0, 3);
+                        phoneNumber += '-';
+                        phoneNumber += inputPhoneNumber.substring(3, 7);
+                        phoneNumber += '-';
+                        phoneNumber += inputPhoneNumber.substring(7, 11);
+
+                        _phoneNumber = phoneNumber;
                       },
                     ),
                     SizedBox(

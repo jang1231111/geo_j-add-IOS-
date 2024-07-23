@@ -1,0 +1,29 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_ble_lib_ios_15 (2.4.1):
+    - Flutter
+    - MultiplatformBleAdapter (~> 0.1.9)
+  - MultiplatformBleAdapter (0.1.9)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_ble_lib_ios_15 (from `.symlinks/plugins/flutter_ble_lib_ios_15/ios`)
+
+SPEC REPOS:
+  trunk:
+    - MultiplatformBleAdapter
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_ble_lib_ios_15:
+    :path: ".symlinks/plugins/flutter_ble_lib_ios_15/ios"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_ble_lib_ios_15: 6c856306f784bcb94f3e1ca2fc4834f865925d25
+  MultiplatformBleAdapter: 5a6a897b006764392f9cef785e4360f54fb9477d
+
+PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+
+COCOAPODS: 1.15.2

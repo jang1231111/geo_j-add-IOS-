@@ -1,10 +1,4 @@
-// import 'package:fb_auth_provider/models/custom_error.dart';
-// import 'package:fb_auth_provider/providers/signup/signup_provider.dart';
-// import 'package:fb_auth_provider/providers/signup/signup_state.dart';
-// import 'package:fb_auth_provider/utils/error_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:validators/validators.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
