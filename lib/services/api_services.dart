@@ -77,7 +77,7 @@ class ApiServices {
 
       final deviceList = responseBody.map((i) => Device.fromJson(i)).toList();
 
-      print('devicelist123123 : $deviceList');
+      print('Devicelist : $deviceList');
 
       return deviceList;
     } catch (e) {

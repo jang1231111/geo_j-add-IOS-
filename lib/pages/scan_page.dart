@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
+import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/debounce.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class ScanPage extends StatelessWidget {
@@ -51,7 +56,7 @@ class ScanHeader extends StatelessWidget {
         ),
         Text(
           // '${context.watch<ActiveTodoCountState>().activeTodoCount} items left',
-          'Searching Device',
+          '남은 배송 건 : ? 건',
           style: TextStyle(fontSize: 20.0, color: Colors.black),
         )
       ],
@@ -106,10 +111,10 @@ class SearchAndFilterDevice extends StatelessWidget {
       },
       child: Text(
         filter == Filter.all
-            ? 'All'
+            ? '전체'
             : filter == Filter.active
-                ? 'Active'
-                : 'Completed',
+                ? '배송 중'
+                : '배송 완료',
         style: TextStyle(
           fontSize: 18.0,
           color: textColor(context, filter),
@@ -124,42 +129,52 @@ class SearchAndFilterDevice extends StatelessWidget {
   }
 }
 
-class ShowDevices extends StatelessWidget {
+class ShowDevices extends StatefulWidget {
   const ShowDevices({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final deviceList =
-        context.watch<FilteredDevicesProvider>().state.filteredDevices;
-    return ListView.separated(
-      primary: false,
-      shrinkWrap: true,
-      itemCount: deviceList.length,
-      separatorBuilder: (BuildContext context, int index) {
-        return Divider(
-          color: Colors.grey,
-        );
-      },
-      itemBuilder: (BuildContext context, int index) {
-        return DeviceItem(device: deviceList[index]);
-      },
-    );
-  }
+  State<ShowDevices> createState() => _ShowDevicesState();
 }
 
-class DeviceItem extends StatefulWidget {
-  final Device device;
+class _ShowDevicesState extends State<ShowDevices> {
+  late final devices;
 
-  const DeviceItem({super.key, required this.device});
-
-  @override
-  State<DeviceItem> createState() => _DeviceItemState();
-}
-
-class _DeviceItemState extends State<DeviceItem> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      devices = context.read<SigninProvider>().state.signinInfo.devices;
+    });
+
+    permissionRequest();
+  }
+
+  void permissionRequest() async {
+    final status = await Permission.bluetooth.request();
+    print(status);
+
+    scan();
+  }
+
+  void scan() async {
+    FlutterBluePlus.onScanResults.listen(
+      (results) {
+        if (results.isNotEmpty) {
+          ScanResult r = results.last; // the most recently found device
+
+          print(
+              '${r.device.remoteId}: "${r.advertisementData.advName}" found! ${r.advertisementData.manufacturerData}');
+        }
+      },
+      onError: (e) => print(e),
+    );
+
+    int divisor = Platform.isAndroid ? 8 : 1;
+    await FlutterBluePlus.startScan(
+        timeout: const Duration(minutes: 7),
+        continuousUpdates: true,
+        continuousDivisor: divisor);
   }
 
   @override
@@ -169,12 +184,37 @@ class _DeviceItemState extends State<DeviceItem> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredDevices =
+        context.watch<FilteredDevicesProvider>().state.filteredDevices;
+
+    return ListView.separated(
+      primary: false,
+      shrinkWrap: true,
+      itemCount: filteredDevices.length,
+      separatorBuilder: (BuildContext context, int index) {
+        return Divider(
+          color: Colors.grey,
+        );
+      },
+      itemBuilder: (BuildContext context, int index) {
+        return DeviceItem(device: filteredDevices[index]);
+      },
+    );
+  }
+}
+
+class DeviceItem extends StatelessWidget {
+  final Device device;
+  const DeviceItem({super.key, required this.device});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       child: Column(
         children: [
           Container(
               decoration: BoxDecoration(
-                color: widget.device.transportState == 1
+                color: device.transportState == 1
                     ? const Color.fromRGBO(179, 179, 179, 1)
                     : Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -189,10 +229,11 @@ class _DeviceItemState extends State<DeviceItem> {
                       flex: 10,
                       child: Container(
                           decoration: BoxDecoration(
-                              color: widget.device.transportState == 1
+                              color: device.transportState == 1
                                   ? const Color.fromRGBO(136, 136, 136, 1)
-                                  : widget.device.arrivalTime.isBefore(
-                                          DateTime.now().toLocal().subtract(
+                                  : device.arrivalTime.isBefore(DateTime.now()
+                                          .toLocal()
+                                          .subtract(
                                               const Duration(minutes: 10)))
                                       ? const Color.fromRGBO(30, 135, 74, 1)
                                       : const Color.fromRGBO(227, 40, 53, 1),
@@ -219,9 +260,9 @@ class _DeviceItemState extends State<DeviceItem> {
                                     //     deviceList[index].shippingSeq);
                                   },
                                   child: Text(
-                                    widget.device.transportState == 2
-                                        ? widget.device.destination + ' (회송)'
-                                        : widget.device.destination,
+                                    device.transportState == 2
+                                        ? device.destination + ' (회송)'
+                                        : device.destination,
                                     style: Locate(context),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
@@ -315,10 +356,10 @@ class _DeviceItemState extends State<DeviceItem> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Text(
-                            widget.device.boxName,
+                            device.boxName,
                             style: M_Name(context),
                           ),
-                          widget.device.arrivalTime.isBefore(DateTime.now()
+                          device.arrivalTime.isBefore(DateTime.now()
                                   .toLocal()
                                   .subtract(Duration(days: 200)))
                               ? Text(
@@ -328,7 +369,7 @@ class _DeviceItemState extends State<DeviceItem> {
                               : Text(
                                   '최근 업로드 시간 : ' +
                                       DateFormat('d일 HH:mm:ss')
-                                          .format(widget.device.arrivalTime),
+                                          .format(device.arrivalTime),
                                   style: lastUpdateTextStyle(context),
                                 ),
                         ],
@@ -342,7 +383,7 @@ class _DeviceItemState extends State<DeviceItem> {
                             flex: 48,
                             child: Container(
                               alignment: Alignment.center,
-                              child: Text(widget.device.transportState == 1
+                              child: Text(device.transportState == 1
                                       ? '배송 완료'
                                       : 'strMapper'
                                   // strMapper(

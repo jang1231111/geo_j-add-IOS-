@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
@@ -17,7 +16,7 @@ class FilteredDevicesProvider {
 
   FilteredDevicesState get state {
     List<Device> _filteredDevices;
-    List<Device> _deviceList = signinProvider.state.signinInfo.deviceList;
+    List<Device> _deviceList = signinProvider.state.signinInfo.devices;
 
     switch (deviceFilterProvider.state.filter) {
       case Filter.active:
@@ -43,7 +42,7 @@ class FilteredDevicesProvider {
           .toList();
     }
 
-    print('_filteredDevices $_filteredDevices');
+    // print('_filteredDevices $_filteredDevices');
 
     return FilteredDevicesState(filteredDevices: _filteredDevices);
   }

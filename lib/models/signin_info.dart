@@ -6,20 +6,20 @@ enum Filter {
 
 class SigninInfo {
   final Centerinfo centerInfo;
-  final List<Device> deviceList;
+  final List<Device> devices;
 
   factory SigninInfo.initial() {
     return SigninInfo(
         centerInfo: Centerinfo(
             centerNm: '', centerSn: 0, managerPn: '', getDeviceListUri: ''),
-        deviceList: []);
+        devices: []);
   }
 
-  SigninInfo({required this.centerInfo, required this.deviceList});
+  SigninInfo({required this.centerInfo, required this.devices});
 
   @override
   String toString() =>
-      'SigninInfo(centerInfo: $centerInfo, deviceList: $deviceList)';
+      'SigninInfo(centerInfo: $centerInfo, deviceList: $devices)';
 
   SigninInfo copyWith({
     Centerinfo? centerInfo,
@@ -27,7 +27,7 @@ class SigninInfo {
   }) {
     return SigninInfo(
       centerInfo: centerInfo ?? this.centerInfo,
-      deviceList: deviceList ?? this.deviceList,
+      devices: deviceList ?? this.devices,
     );
   }
 }
@@ -84,6 +84,7 @@ class Device {
   final int tempHigh;
   final DateTime arrivalTime;
   final String datetime;
+  final double temperature;
 
   Device(
       {required this.shippingSeq,
@@ -95,7 +96,8 @@ class Device {
       required this.tempLow,
       required this.tempHigh,
       required this.arrivalTime,
-      required this.datetime});
+      required this.datetime,
+      this.temperature = 3});
 
   factory Device.fromJson(Map<String, dynamic> json) {
     return Device(
