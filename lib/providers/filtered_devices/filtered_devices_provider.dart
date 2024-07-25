@@ -16,21 +16,21 @@ class FilteredDevicesProvider {
 
   FilteredDevicesState get state {
     List<Device> _filteredDevices;
-    List<Device> _deviceList = signinProvider.state.signinInfo.devices;
+    List<Device> _devices = signinProvider.state.signinInfo.devices;
 
     switch (deviceFilterProvider.state.filter) {
       case Filter.active:
-        _filteredDevices = _deviceList.where((Device device) {
+        _filteredDevices = _devices.where((Device device) {
           return device.transportState != 1;
         }).toList();
         break;
       case Filter.completed:
-        _filteredDevices = _deviceList.where((Device device) {
+        _filteredDevices = _devices.where((Device device) {
           return device.transportState == 1;
         }).toList();
         break;
       case Filter.all:
-        _filteredDevices = _deviceList;
+        _filteredDevices = _devices;
         break;
     }
 

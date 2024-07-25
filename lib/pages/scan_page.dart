@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
@@ -12,6 +10,7 @@ import 'package:geo_j/utils/debounce.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'dart:typed_data';
 
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
@@ -145,36 +144,60 @@ class _ShowDevicesState extends State<ShowDevices> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       devices = context.read<SigninProvider>().state.signinInfo.devices;
+      permissionRequest();
     });
-
-    permissionRequest();
   }
 
   void permissionRequest() async {
-    final status = await Permission.bluetooth.request();
-    print(status);
-
-    scan();
+    if (await Permission.bluetooth.request().isGranted) {
+      scan();
+    }
+    // final status = await Permission.bluetooth.request();
+    // print(status);
   }
 
   void scan() async {
-    FlutterBluePlus.onScanResults.listen(
+    var subscription = FlutterBluePlus.onScanResults.listen(
       (results) {
+        print('1111');
         if (results.isNotEmpty) {
-          ScanResult r = results.last; // the most recently found device
+          ScanResult scanResult = results.last;
+          if (scanResult.advertisementData.advName == 'T306') {
+            Uint8List advertiseData = Uint8List.fromList(
+                scanResult.advertisementData.manufacturerData.values.first);
 
-          print(
-              '${r.device.remoteId}: "${r.advertisementData.advName}" found! ${r.advertisementData.manufacturerData}');
+            String serial1 = advertiseData[5].toRadixString(16).padLeft(2, '0');
+            String serial2 = advertiseData[6].toRadixString(16).padLeft(2, '0');
+            String serial3 = advertiseData[7].toRadixString(16).padLeft(2, '0');
+            String deNumber = serial1 + serial2 + serial3;
+
+            print(scanResult.advertisementData.manufacturerData.values.first);
+
+            int tmp = ByteData.sublistView(advertiseData.sublist(10, 12))
+                .getInt16(0, Endian.big);
+
+            double temperature = tmp / 100;
+
+            int battery = advertiseData[14];
+
+            context.read<SigninProvider>().updateAdvertise(
+                deNumber: deNumber,
+                temeperature: temperature,
+                battery: battery);
+          }
         }
       },
       onError: (e) => print(e),
     );
 
-    int divisor = Platform.isAndroid ? 8 : 1;
+    FlutterBluePlus.cancelWhenScanComplete(subscription);
+
+    // int divisor = Platform.isAndroid ? 8 : 1;
     await FlutterBluePlus.startScan(
-        timeout: const Duration(minutes: 7),
-        continuousUpdates: true,
-        continuousDivisor: divisor);
+      timeout: const Duration(minutes: 7),
+      // continuousUpdates: true,
+      // continuousDivisor: divisor,
+    );
   }
 
   @override
@@ -408,26 +431,23 @@ class DeviceItem extends StatelessWidget {
                               flex: 24,
                               child: Container(
                                   child: Text(
-                                // deviceList[index].getTemperature().toString() +
-                                '°C ',
+                                '${device.temperature}°C',
                                 style: Temp(context),
                               ))),
                           Expanded(
-                              flex: 40,
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // getbatteryImage(
-                                    //     deviceList[index].getBattery()),
-                                    // Text(
-                                    //   '  ' +
-                                    //       deviceList[index]
-                                    //           .getBattery()
-                                    //           .toString() +
-                                    //       '%',
-                                    // style: Temp(context),
-                                    // ),
-                                  ]))
+                            flex: 40,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // getbatteryImage(
+                                //     deviceList[index].getBattery()),
+                                Text(
+                                  '${device.battery}%',
+                                  style: Temp(context),
+                                )
+                              ],
+                            ),
+                          )
                         ],
                       ))
                 ],

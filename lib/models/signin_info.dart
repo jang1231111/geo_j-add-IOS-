@@ -18,16 +18,15 @@ class SigninInfo {
   SigninInfo({required this.centerInfo, required this.devices});
 
   @override
-  String toString() =>
-      'SigninInfo(centerInfo: $centerInfo, deviceList: $devices)';
+  String toString() => 'SigninInfo(centerInfo: $centerInfo, devices: $devices)';
 
   SigninInfo copyWith({
     Centerinfo? centerInfo,
-    List<Device>? deviceList,
+    List<Device>? devices,
   }) {
     return SigninInfo(
       centerInfo: centerInfo ?? this.centerInfo,
-      devices: deviceList ?? this.devices,
+      devices: devices ?? this.devices,
     );
   }
 }
@@ -85,6 +84,7 @@ class Device {
   final DateTime arrivalTime;
   final String datetime;
   final double temperature;
+  final int battery;
 
   Device(
       {required this.shippingSeq,
@@ -97,7 +97,8 @@ class Device {
       required this.tempHigh,
       required this.arrivalTime,
       required this.datetime,
-      this.temperature = 3});
+      this.temperature = -999,
+      this.battery = -999});
 
   factory Device.fromJson(Map<String, dynamic> json) {
     return Device(
@@ -113,11 +114,6 @@ class Device {
         datetime: json['datetime']);
   }
 
-  @override
-  String toString() {
-    return 'Device(shippingSeq: $shippingSeq, boxName: $boxName, deNumber: $deNumber, destination: $destination, transportState: $transportState, dbNm: $dbNm, tempLow: $tempLow, tempHigh: $tempHigh, arrivalTime: $arrivalTime, datetime: $datetime)';
-  }
-
   Device copyWith({
     int? shippingSeq,
     String? boxName,
@@ -129,6 +125,8 @@ class Device {
     int? tempHigh,
     DateTime? arrivalTime,
     String? datetime,
+    double? temperature,
+    int? battery,
   }) {
     return Device(
       shippingSeq: shippingSeq ?? this.shippingSeq,
@@ -141,6 +139,13 @@ class Device {
       tempHigh: tempHigh ?? this.tempHigh,
       arrivalTime: arrivalTime ?? this.arrivalTime,
       datetime: datetime ?? this.datetime,
+      temperature: temperature ?? this.temperature,
+      battery: battery ?? this.battery,
     );
+  }
+
+  @override
+  String toString() {
+    return 'Device(shippingSeq: $shippingSeq, boxName: $boxName, deNumber: $deNumber, destination: $destination, transportState: $transportState, dbNm: $dbNm, tempLow: $tempLow, tempHigh: $tempHigh, arrivalTime: $arrivalTime, datetime: $datetime, temperature: $temperature)';
   }
 }
