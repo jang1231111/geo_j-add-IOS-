@@ -15,17 +15,17 @@ class FilteredDevicesProvider {
       required this.signinProvider});
 
   FilteredDevicesState get state {
-    List<Device> _filteredDevices;
-    List<Device> _devices = signinProvider.state.signinInfo.devices;
+    List<A10> _filteredDevices;
+    List<A10> _devices = signinProvider.state.signinInfo.devices;
 
     switch (deviceFilterProvider.state.filter) {
       case Filter.active:
-        _filteredDevices = _devices.where((Device device) {
+        _filteredDevices = _devices.where((A10 device) {
           return device.transportState != 1;
         }).toList();
         break;
       case Filter.completed:
-        _filteredDevices = _devices.where((Device device) {
+        _filteredDevices = _devices.where((A10 device) {
           return device.transportState == 1;
         }).toList();
         break;
@@ -36,7 +36,7 @@ class FilteredDevicesProvider {
 
     if (deviceSearchProvider.state.searchTerm.isNotEmpty) {
       _filteredDevices = _filteredDevices
-          .where((Device device) => device.boxName
+          .where((A10 device) => device.boxName
               .toLowerCase()
               .contains(deviceSearchProvider.state.searchTerm))
           .toList();

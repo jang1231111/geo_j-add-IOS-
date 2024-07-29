@@ -1,7 +1,7 @@
 import 'package:geo_j/models/signin_info.dart';
 
 class FilteredDevicesState {
-  final List<Device> filteredDevices;
+  final List<A10> filteredDevices;
 
   FilteredDevicesState({required this.filteredDevices});
 
@@ -14,7 +14,7 @@ class FilteredDevicesState {
       'FilteredDevicesState(filteredDevices: $filteredDevices)';
 
   FilteredDevicesState copyWith({
-    List<Device>? filteredDevices,
+    List<A10>? filteredDevices,
   }) {
     return FilteredDevicesState(
       filteredDevices: filteredDevices ?? this.filteredDevices,

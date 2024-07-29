@@ -13,8 +13,7 @@ class SigninRepositories {
           await apiServices.getCenterInfo(phoneNumber);
       print('CenterInfo : $centerinfo');
 
-      final List<Device> deviceList =
-          await apiServices.getDeviceList(centerinfo);
+      final List<A10> deviceList = await apiServices.getDeviceList(centerinfo);
 
       // for (int i = 0; i < deviceList.length; i++) {
       //   print('**********************');

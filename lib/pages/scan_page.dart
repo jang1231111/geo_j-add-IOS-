@@ -7,6 +7,7 @@ import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/debounce.dart';
+import 'package:geo_j/utils/bluetooth.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -137,6 +138,7 @@ class ShowDevices extends StatefulWidget {
 
 class _ShowDevicesState extends State<ShowDevices> {
   late final devices;
+  ScanResult? recentDevice;
 
   @override
   void initState() {
@@ -152,26 +154,22 @@ class _ShowDevicesState extends State<ShowDevices> {
     if (await Permission.bluetooth.request().isGranted) {
       scan();
     }
-    // final status = await Permission.bluetooth.request();
-    // print(status);
   }
 
   void scan() async {
     var subscription = FlutterBluePlus.onScanResults.listen(
-      (results) {
-        print('1111');
+      (results) async {
         if (results.isNotEmpty) {
           ScanResult scanResult = results.last;
-          if (scanResult.advertisementData.advName == 'T306') {
+          if (recentDevice != null && recentDevice != results.last) {
             Uint8List advertiseData = Uint8List.fromList(
                 scanResult.advertisementData.manufacturerData.values.first);
 
+            /// Serial 6 자리  ex)1903CE
             String serial1 = advertiseData[5].toRadixString(16).padLeft(2, '0');
             String serial2 = advertiseData[6].toRadixString(16).padLeft(2, '0');
             String serial3 = advertiseData[7].toRadixString(16).padLeft(2, '0');
-            String deNumber = serial1 + serial2 + serial3;
-
-            print(scanResult.advertisementData.manufacturerData.values.first);
+            String serial = serial1 + serial2 + serial3;
 
             int tmp = ByteData.sublistView(advertiseData.sublist(10, 12))
                 .getInt16(0, Endian.big);
@@ -180,11 +178,16 @@ class _ShowDevicesState extends State<ShowDevices> {
 
             int battery = advertiseData[14];
 
-            context.read<SigninProvider>().updateAdvertise(
-                deNumber: deNumber,
-                temeperature: temperature,
-                battery: battery);
+            bool isUpdate = context.read<SigninProvider>().updateAdvertise(
+                serial: serial, temeperature: temperature, battery: battery);
+
+            if (isUpdate) {
+              bleStateListener(context, scanResult, serial);
+
+              await scanResult.device.connect();
+            }
           }
+          recentDevice = scanResult;
         }
       },
       onError: (e) => print(e),
@@ -194,10 +197,15 @@ class _ShowDevicesState extends State<ShowDevices> {
 
     // int divisor = Platform.isAndroid ? 8 : 1;
     await FlutterBluePlus.startScan(
-      timeout: const Duration(minutes: 7),
-      // continuousUpdates: true,
-      // continuousDivisor: divisor,
-    );
+        timeout: const Duration(minutes: 7),
+        withNames: [
+          'T301',
+          'T305',
+          'T306',
+        ]
+        // continuousUpdates: true,
+        // continuousDivisor: divisor,
+        );
   }
 
   @override
@@ -220,14 +228,17 @@ class _ShowDevicesState extends State<ShowDevices> {
         );
       },
       itemBuilder: (BuildContext context, int index) {
-        return DeviceItem(device: filteredDevices[index]);
+        return
+            // Text('data');
+
+            DeviceItem(device: filteredDevices[index]);
       },
     );
   }
 }
 
 class DeviceItem extends StatelessWidget {
-  final Device device;
+  final A10 device;
   const DeviceItem({super.key, required this.device});
 
   @override
