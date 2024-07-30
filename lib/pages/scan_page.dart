@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
+import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/providers/active_shipping_count/active_shipping_count_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/debounce.dart';
 import 'package:geo_j/utils/bluetooth.dart';
+import 'package:geo_j/utils/error_dialog.dart';
+import 'package:geo_j/widgets/shipping_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -20,20 +24,23 @@ class ScanPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: 20.0,
-              vertical: 40.0,
-            ),
-            child: Column(
-              children: [
-                ScanHeader(),
-                SizedBox(height: 20.0),
-                SearchAndFilterDevice(),
-                ShowDevices(),
-              ],
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: 20.0,
+                vertical: 40.0,
+              ),
+              child: Column(
+                children: [
+                  ScanHeader(),
+                  SizedBox(height: 20.0),
+                  SearchAndFilterDevice(),
+                  ShowDevices(),
+                ],
+              ),
             ),
           ),
         ),
@@ -55,8 +62,7 @@ class ScanHeader extends StatelessWidget {
           style: TextStyle(fontSize: 40.0),
         ),
         Text(
-          // '${context.watch<ActiveTodoCountState>().activeTodoCount} items left',
-          '남은 배송 건 : ? 건',
+          '남은 배송 건: ${context.watch<ActiveShippingCountProvider>().state.activeShippingCount}건',
           style: TextStyle(fontSize: 20.0, color: Colors.black),
         )
       ],
@@ -66,7 +72,7 @@ class ScanHeader extends StatelessWidget {
 
 class SearchAndFilterDevice extends StatelessWidget {
   SearchAndFilterDevice({super.key});
-  final debounce = Debounce(millonseconds: 1000);
+  final debounce = Debounce(millonseconds: 500);
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +158,7 @@ class _ShowDevicesState extends State<ShowDevices> {
 
   void permissionRequest() async {
     if (await Permission.bluetooth.request().isGranted) {
-      scan();
+      // scan();
     }
   }
 
@@ -319,39 +325,21 @@ class DeviceItem extends StatelessWidget {
                                 alignment: Alignment.center,
                                 child: InkWell(
                                   onTap: () async {
-                                    // String result;
-                                    // result = await shipFinishDialog(
-                                    //     context, deviceList[index], index);
-
-                                    // if (result == 'success') {
-                                    //   String resultFinishedText = '';
-
-                                    //   resultFinishedText = '[' +
-                                    //       deviceList[index].destName +
-                                    //       '] ' +
-                                    //       DateFormat('M월 d일 HH:mm:ss')
-                                    //           .format(DateTime.now().toLocal())
-                                    //           .toString() +
-                                    //       ' 배송 종료';
-
-                                    //   resultfinishedListTexts
-                                    //       .add(resultFinishedText);
-
-                                    //   deviceList[index].status = 1;
-                                    //   for (int k = 0;
-                                    //       k < userList.userDevices.length;
-                                    //       k++) {
-                                    //     if (userList.userDevices[k].deNumber
-                                    //             .substring(11) ==
-                                    //         deviceList[index].serialNumber) {
-                                    //       setState(() {
-                                    //         // userList.userDevices.removeAt(k);
-                                    //         userList.userDevices[k].status = 1;
-                                    //         deviceList[index].status = 1;
-                                    //       });
-                                    //       break;
-                                    //     }
-                                    //   }
+                                    int? transportState;
+                                    transportState =
+                                        await shipFinishDialog(context, device);
+                                    if (transportState != null) {
+                                      try {
+                                        print(transportState);
+                                        await context
+                                            .read<SigninProvider>()
+                                            .updateTransportState(
+                                                a10: device,
+                                                transportState: transportState);
+                                      } on CustomError catch (e) {
+                                        errorDialog(context, e.toString());
+                                      }
+                                    }
                                   },
                                   child: Text('종료', style: boldTextStyle),
                                 ),

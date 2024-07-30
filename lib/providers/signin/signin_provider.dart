@@ -1,19 +1,18 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/providers/signin/signin_state.dart';
 import 'package:geo_j/repositories/signin_repositories.dart';
-import 'package:geo_j/utils/bluetooth.dart';
+import 'package:geo_j/repositories/transport_state_repositories.dart';
 
 class SigninProvider with ChangeNotifier {
   SigninState _state = SigninState.initial();
   SigninState get state => _state;
-  SigninProvider({required this.signinRepositories});
+  SigninProvider(
+      {required this.signinRepositories, required this.transportRepositories});
 
   final SigninRepositories signinRepositories;
+  final ShipstateRepositories transportRepositories;
 
   Future<void> signin({
     required String phoneNumber,
@@ -33,6 +32,50 @@ class SigninProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> updateTransportState({
+    required A10 a10,
+    required int transportState,
+  }) async {
+    try {
+      final deviceList = await transportRepositories.updateTransportState(
+          a10: a10,
+          transportState: transportState,
+          signinInfo: _state.signinInfo);
+
+      SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
+
+      _state = _state.copyWith(signinInfo: signinInfo);
+      notifyListeners();
+
+      _state = _state.copyWith(
+          signinStatus: SigninStatus.success, signinInfo: signinInfo);
+      notifyListeners();
+    } on CustomError catch (e) {
+      _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Future<void> getDeviceList({
+  //   required String phoneNumber,
+  // }) async {
+  //   try {
+  //     final centerInfo = _state.signinInfo.centerInfo;
+  //     final deviceList =
+  //         await signinRepositories.getDeviceList(centerinfo: centerInfo);
+
+  //     SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
+
+  //     _state = _state.copyWith(signinInfo: signinInfo);
+  //     notifyListeners();
+  //   } on CustomError catch (e) {
+  //     _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
+  //     notifyListeners();
+  //     rethrow;
+  //   }
+  // }
 
   bool updateAdvertise(
       {required String serial,

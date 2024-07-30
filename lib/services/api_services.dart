@@ -86,7 +86,11 @@ class ApiServices {
     }
   }
 
-  Future<void> sendLogData(A10 a10, List<LogData> logDatas, String url) async {
+  Future<void> sendLogData(A10? a10, List<LogData> logDatas, String url) async {
+    if (a10 == null) {
+      return;
+    }
+
     // 전송 데이터 JSON
     final Map<String, dynamic> data = new Map<String, dynamic>();
     final Map<String, dynamic> response = new Map<String, dynamic>();
@@ -160,6 +164,66 @@ class ApiServices {
         // throw WeatherException('Cannot get the location of $city');
       }
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateTransportState(
+      A10 a10, int transportState, String url) async {
+    print('updateTransportState');
+    // 전송 데이터 JSON
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> response = new Map<String, dynamic>();
+    final Map<String, dynamic> common = new Map<String, dynamic>();
+    final Map<String, dynamic> item = new Map<String, dynamic>();
+    final List<dynamic> itemlist = [];
+
+    // common 안에 seq
+    common['shippingSeq'] = a10.shippingSeq;
+    common['deNumber'] = a10.deNumber;
+    common['boxName'] = a10.boxName;
+
+    item["itemlist"] = itemlist;
+    response["item"] = item;
+    response["common"] = common;
+    data["response"] = response;
+
+    int itemIndex = 0;
+
+    itemlist.add(new Map<String, dynamic>());
+    itemlist[itemIndex]["temp"] = 9999;
+    itemlist[itemIndex]["hum"] = 0;
+    itemlist[itemIndex]["battery"] = a10.battery;
+    itemlist[itemIndex]["datetime"] = DateTime.now().toLocal().toString();
+    itemlist[itemIndex]["tempCount"] = 0;
+    itemlist[itemIndex]["humCount"] = 0;
+    itemlist[itemIndex]["transportState"] = transportState;
+    itemIndex++;
+
+    var client = http.Client();
+    var uri = Uri.parse(url);
+    try {
+      print('updateTransportState test1');
+      final http.Response response = await client.post(uri,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(data));
+
+      print('updateTransportState test2');
+
+      if (response.statusCode != 200) {
+        print('updateTransportState test3');
+        throw Exception(httpErrorHandler(response));
+      }
+      print('updateTransportState test4');
+
+      print(response.body.toString());
+      final Map<String, dynamic> responseBody = json.decode(response.body);
+
+      if (responseBody.isEmpty) {
+        // throw WeatherException('Cannot get the location of $city');
+      }
+    } catch (e) {
+      print('updateTransportState ERR');
       rethrow;
     }
   }
