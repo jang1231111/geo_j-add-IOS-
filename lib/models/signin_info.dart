@@ -94,7 +94,7 @@ class A10 {
   final int tempLow;
   final int tempHigh;
   final DateTime arrivalTime;
-  final String datetime;
+  final DateTime datetime;
   final double temperature;
   final int battery;
   final String bleState;
@@ -113,22 +113,23 @@ class A10 {
     required this.datetime,
     this.temperature = -999,
     this.battery = -999,
-    this.bleState = '대기 중',
+    this.bleState = '온도센서 스캔 중',
     this.logDatas = const [],
   });
 
   factory A10.fromJson(Map<String, dynamic> json) {
     return A10(
-        shippingSeq: json['shippingSeq'],
-        boxName: json['boxName'],
-        deNumber: json['deNumber'],
-        destination: json['destination'],
-        transportState: json['transportState'],
-        dbNm: json['dbNm'],
-        tempLow: json['tempLow'],
-        tempHigh: json['tempHigh'],
-        arrivalTime: DateTime.parse(json['arrivalTime']),
-        datetime: json['datetime']);
+      shippingSeq: json['shippingSeq'],
+      boxName: json['boxName'],
+      deNumber: json['deNumber'],
+      destination: json['destination'],
+      transportState: json['transportState'],
+      dbNm: json['dbNm'],
+      tempLow: json['tempLow'],
+      tempHigh: json['tempHigh'],
+      arrivalTime: DateTime.parse(json['arrivalTime']),
+      datetime: DateTime.parse(json['datetime']),
+    );
   }
 
   A10 copyWith(
@@ -141,7 +142,7 @@ class A10 {
       int? tempLow,
       int? tempHigh,
       DateTime? arrivalTime,
-      String? datetime,
+      DateTime? datetime,
       double? temperature,
       int? battery,
       String? bleState,

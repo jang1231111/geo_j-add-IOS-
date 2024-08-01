@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geo_j/constants/style.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -42,69 +43,23 @@ class _SignupPageState extends State<SignupPage> {
   Widget build(BuildContext context) {
     // final signupState = context.watch<SignupProvider>().state;
 
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Form(
-              key: _formKey,
-              autovalidateMode: _autovalidateMode,
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/flutter_logo.png',
-                        width: 250,
-                        height: 250,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        '옵티로',
-                        style: TextStyle(fontSize: 20.0),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        '주소',
-                        style: TextStyle(fontSize: 20.0),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        '전화번호',
-                        style: TextStyle(fontSize: 20.0),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        '문제 해결1',
-                        style: TextStyle(fontSize: 20.0),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        '문제 해결2',
-                        style: TextStyle(fontSize: 20.0),
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '(주)옵티로',
+          style: optilo_name(context),
         ),
-      ),
+        Text(
+          '인천광역시 연수구 송도미래로 30 스마트밸리 D동',
+          style: optilo_info(context),
+        ),
+        Text(
+          'H : www.optilo.net  T : 070-5143-8585',
+          style: optilo_info(context),
+        ),
+      ],
     );
   }
 }

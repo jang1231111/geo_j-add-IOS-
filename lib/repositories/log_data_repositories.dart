@@ -8,18 +8,11 @@ class LogdataRepositories {
 
   LogdataRepositories({required this.apiServices});
 
-  Future<void> sendLogData({
-    required List<int> notifyResult,
+  Future<A10?> sendLogData({
+    required String serial,
     required SigninInfo signinInfo,
     required List<LogData> logDatas,
   }) async {
-    /// Serial
-    List<int> serials = notifyResult.sublist(4, 7).reversed.toList();
-    String serial = '';
-    for (int i = 0; i < serials.length; i++) {
-      serial += serials[i].toRadixString(16);
-    }
-
     /// 전송 기기
     List<A10> devices = signinInfo.devices;
     A10? a10;
@@ -31,10 +24,27 @@ class LogdataRepositories {
       }
     }
 
+    /// 목록에 기기 없는 경우
+    if (a10 == null) {
+      return null;
+    }
+
     /// 데이터 전송
     try {
       await apiServices.sendLogData(
           a10, logDatas, signinInfo.centerInfo.sendLogDataUri);
+      final List<A10> deviceList =
+          await apiServices.getDeviceList(signinInfo.centerInfo);
+
+      for (int i = 0; i < deviceList.length; i++) {
+        if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+            serial.toLowerCase()) {
+          a10 = devices[i];
+          break;
+        }
+      }
+
+      return a10;
     } catch (e) {
       throw CustomError(errMsg: e.toString());
     }

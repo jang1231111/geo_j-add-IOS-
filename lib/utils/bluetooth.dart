@@ -5,7 +5,7 @@ import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/log_data.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
-import 'package:geo_j/repositories/logdata_repositories.dart';
+import 'package:geo_j/repositories/log_data_repositories.dart';
 import 'package:geo_j/utils/convert.dart';
 import 'package:provider/provider.dart';
 
@@ -17,12 +17,19 @@ void bleStateListener(
   var subscription = device.connectionState.listen(
     (BluetoothConnectionState state) async {
       if (state == BluetoothConnectionState.disconnected) {
-        print(
-            "$deNumber Disconnected : ${device.disconnectReason?.code} ${device.disconnectReason?.description}");
+        context
+            .read<SigninProvider>()
+            .updateBleState(serial: deNumber, bleState: '온도센서 스캔 중');
+
+        // print(
+        //     "$deNumber Disconnected : ${device.disconnectReason?.code} ${device.disconnectReason?.description}");
       }
       if (state == BluetoothConnectionState.connected) {
-        print(
-            "$deNumber Connected : ${device.disconnectReason?.code} ${device.disconnectReason?.description}");
+        context
+            .read<SigninProvider>()
+            .updateBleState(serial: deNumber, bleState: '온도센서 연결 완료');
+        // print(
+        //     "$deNumber Connected : ${device.disconnectReason?.code} ${device.disconnectReason?.description}");
 
         var characteristic = await discoverCharacteristic(context, device);
         writeCharacteristic(scanResult, characteristic);
@@ -102,23 +109,20 @@ Future<void> notifyStream(
   final List<LogData> logDatas = [];
   final subscription =
       notifyCharacteristic.onValueReceived.listen((notifyResult) async {
+    print('notifyResult  test  $notifyResult');
+
     if (notifyResult[10] == 0x03) {
       Uint8List minmaxIndex = getMinMaxIndex(Uint8List.fromList(notifyResult));
 
-      // int startIndex = threeBytesToint(minmaxIndex.sublist(0, 3));
-      // int endIndex = threeBytesToint(minmaxIndex.sublist(3, 6));
-      int tempstamp = threeBytesToint(minmaxIndex.sublist(3, 6)) - 20;
+      int endStamp = threeBytesToint(minmaxIndex.sublist(0, 3));
+      int startStamp = endStamp - 72;
 
-      // if (tempstamp <= 0) {
-      //   tempstamp += (720 / interval).floor();
-      // }
+      if (startStamp <= 0) {
+        startStamp = 0;
+      }
 
-      // 데이터 개수 저장
-      // int dataCount = endIndex - tempstamp;
-
-      final startTest = convertInt2Bytes(tempstamp, Endian.big, 3);
-
-      Uint8List startIndex = Uint8List.fromList(startTest);
+      Uint8List startIndex =
+          Uint8List.fromList(convertInt2Bytes(startStamp, Endian.big, 3));
       Uint8List endindex = minmaxIndex.sublist(3, 6);
 
       writeCharacteristic.write(
@@ -138,23 +142,31 @@ Future<void> notifyStream(
       logDatas.add(logData);
     }
     if (notifyResult[10] == 0x06) {
-      LogdataRepositories logdataRepositories =
-          context.read<LogdataRepositories>();
+      SigninProvider signinProvider = context.read<SigninProvider>();
 
-      SigninInfo signinInfo = context.read<SigninProvider>().state.signinInfo;
-      // 여기서 업데이트 타임 비교해서 기기 보내주기
+      /// Serial
+      List<int> serials = notifyResult.sublist(4, 7).reversed.toList();
+      String serial = '';
+      for (int i = 0; i < serials.length; i++) {
+        serial += serials[i].toRadixString(16).padLeft(2, '0');
+      }
 
+      /// 온도 데이터 전송
       try {
-        await logdataRepositories.sendLogData(
-          notifyResult: notifyResult,
-          signinInfo: signinInfo,
+        await signinProvider.sendLogData(
+          serial: serial,
           logDatas: logDatas,
         );
 
-        // 업로드 목록 추가
+        /// 연결 종료
+        await device.disconnect();
       } on CustomError catch (e) {
-        e.toString();
-        // 업로드 목록 추가 (에러 발생)
+        print('데이터 전송 실패 : ${e.toString()}');
+
+        /// 전송 실패
+        context
+            .read<SigninProvider>()
+            .updateBleState(serial: serial, bleState: '데이터 전송 실패');
       }
     }
   });

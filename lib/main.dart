@@ -8,7 +8,8 @@ import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
-import 'package:geo_j/repositories/logdata_repositories.dart';
+import 'package:geo_j/repositories/gps_data_repositories.dart';
+import 'package:geo_j/repositories/log_data_repositories.dart';
 import 'package:geo_j/repositories/signin_repositories.dart';
 import 'package:geo_j/repositories/transport_state_repositories.dart';
 import 'package:geo_j/services/api_services.dart';
@@ -41,6 +42,13 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
+        Provider<GpsDataRepositories>(
+          create: (context) => GpsDataRepositories(
+            apiServices: ApiServices(
+              httpClient: http.Client(),
+            ),
+          ),
+        ),
         Provider<LogdataRepositories>(
           create: (context) => LogdataRepositories(
             apiServices: ApiServices(
@@ -50,6 +58,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<SigninProvider>(
           create: (context) => SigninProvider(
+            logdataRepositories: context.read<LogdataRepositories>(),
             signinRepositories: context.read<SigninRepositories>(),
             transportRepositories: context.read<ShipstateRepositories>(),
           ),

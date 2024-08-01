@@ -402,3 +402,51 @@ TextStyle state_end_gray(BuildContext context) {
     fontFamily: 'pretend',
   );
 }
+
+Widget getbatteryImage(BuildContext context, int battery) {
+  if (battery >= 75) {
+    return Image(
+      image: AssetImage('assets/images/battery_100.png'),
+      fit: BoxFit.contain,
+      width: MediaQuery.of(context).size.width * 0.08,
+      height: MediaQuery.of(context).size.width * 0.08,
+    );
+  } else if (battery >= 50) {
+    return Image(
+      image: AssetImage('assets/images/battery_75.png'),
+      fit: BoxFit.contain,
+      width: MediaQuery.of(context).size.width * 0.08,
+      height: MediaQuery.of(context).size.width * 0.08,
+    );
+  } else if (battery >= 35) {
+    return Image(
+      image: AssetImage('assets/images/battery_50.png'),
+      fit: BoxFit.contain,
+      width: MediaQuery.of(context).size.width * 0.08,
+      height: MediaQuery.of(context).size.width * 0.08,
+    );
+  } else if (battery >= 0) {
+    return Image(
+      image: AssetImage('assets/images/battery_25.png'),
+      fit: BoxFit.contain,
+      width: MediaQuery.of(context).size.width * 0.08,
+      height: MediaQuery.of(context).size.width * 0.08,
+    );
+  } else {
+    return Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+}
+
+TextStyle stateStyle(BuildContext context, String input) {
+  if (input == '온도센서 스캔 중') {
+    return state_searching_blue(context);
+  } else if (input == '온도센서 연결 완료') {
+    return state_complete_green(context);
+  } else if (input == '데이터 전송 실패') {
+    return state_ing_red(context);
+  } else {
+    return state_end_gray(context);
+  }
+}

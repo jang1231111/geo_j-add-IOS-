@@ -5,6 +5,7 @@ import 'package:geo_j/models/log_data.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/services/http_error_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:location/location.dart';
 
 class ApiServices {
   final http.Client httpClient;
@@ -86,19 +87,13 @@ class ApiServices {
     }
   }
 
-  Future<void> sendLogData(A10? a10, List<LogData> logDatas, String url) async {
-    if (a10 == null) {
-      return;
-    }
-
-    // 전송 데이터 JSON
+  Future<void> sendLogData(A10 a10, List<LogData> logDatas, String url) async {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     final Map<String, dynamic> response = new Map<String, dynamic>();
     final Map<String, dynamic> common = new Map<String, dynamic>();
     final Map<String, dynamic> item = new Map<String, dynamic>();
     final List<dynamic> itemlist = [];
 
-    // common 안에 seq
     common['shippingSeq'] = a10.shippingSeq;
     common['deNumber'] = a10.deNumber;
     common['boxName'] = a10.boxName;
@@ -157,6 +152,7 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
+      print('sendLogData : $data');
       print(response.body.toString());
       final List<dynamic> responseBody = json.decode(response.body);
 
@@ -170,15 +166,12 @@ class ApiServices {
 
   Future<void> updateTransportState(
       A10 a10, int transportState, String url) async {
-    print('updateTransportState');
-    // 전송 데이터 JSON
     final Map<String, dynamic> data = new Map<String, dynamic>();
     final Map<String, dynamic> response = new Map<String, dynamic>();
     final Map<String, dynamic> common = new Map<String, dynamic>();
     final Map<String, dynamic> item = new Map<String, dynamic>();
     final List<dynamic> itemlist = [];
 
-    // common 안에 seq
     common['shippingSeq'] = a10.shippingSeq;
     common['deNumber'] = a10.deNumber;
     common['boxName'] = a10.boxName;
@@ -203,18 +196,13 @@ class ApiServices {
     var client = http.Client();
     var uri = Uri.parse(url);
     try {
-      print('updateTransportState test1');
       final http.Response response = await client.post(uri,
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(data));
 
-      print('updateTransportState test2');
-
       if (response.statusCode != 200) {
-        print('updateTransportState test3');
         throw Exception(httpErrorHandler(response));
       }
-      print('updateTransportState test4');
 
       print(response.body.toString());
       final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -222,6 +210,49 @@ class ApiServices {
       if (responseBody.isEmpty) {
         // throw WeatherException('Cannot get the location of $city');
       }
+    } catch (e) {
+      print('updateTransportState ERR');
+      rethrow;
+    }
+  }
+
+  Future<void> sendGpsData(
+      LocationData locationData, SigninInfo signinInfo) async {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> response = new Map<String, dynamic>();
+    final Map<String, dynamic> common = new Map<String, dynamic>();
+    final Map<String, dynamic> item = new Map<String, dynamic>();
+    final List<dynamic> itemlist = [];
+
+    common['deNumber'] = signinInfo.centerInfo.managerPn;
+
+    itemlist.add(new Map<String, dynamic>());
+    itemlist[0]["lat"] = locationData.latitude.toString();
+    itemlist[0]["lng"] = locationData.longitude.toString();
+    item["itemlist"] = itemlist;
+    response["item"] = item;
+    response["common"] = common;
+    data["response"] = response;
+
+    var client = http.Client();
+    var uri = Uri.parse(signinInfo.centerInfo.sendLogDataUri);
+    try {
+      final http.Response response = await client.post(uri,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(data));
+
+      if (response.statusCode != 200) {
+        throw Exception(httpErrorHandler(response));
+      }
+
+      print(response.body.toString());
+      final Map<String, dynamic> responseBody = json.decode(response.body);
+
+      if (responseBody.isEmpty) {
+        // throw WeatherException('Cannot get the location of $city');
+      }
+
+      print("GPS DATA" + data.toString());
     } catch (e) {
       print('updateTransportState ERR');
       rethrow;

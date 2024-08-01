@@ -7,7 +7,7 @@ class ShipstateRepositories {
 
   ShipstateRepositories({required this.apiServices});
 
-  Future<List<A10>> updateTransportState(
+  Future<A10?> updateTransportState(
       {required A10 a10,
       required int transportState,
       required SigninInfo signinInfo}) async {
@@ -15,16 +15,18 @@ class ShipstateRepositories {
       await apiServices.updateTransportState(
           a10, transportState, signinInfo.centerInfo.sendLogDataUri);
 
-      final List<A10> deviceList =
+      final List<A10> devices =
           await apiServices.getDeviceList(signinInfo.centerInfo);
 
-      // for (int i = 0; i < deviceList.length; i++) {
-      //   print('**********************');
-      //   print('Device : ${deviceList[i]}');
-      //   print('**********************');
-      // }
+      A10? updated_A10;
 
-      return deviceList;
+      for (int i = 0; i < devices.length; i++) {
+        if (devices[i].deNumber == a10.deNumber) {
+          updated_A10 = devices[i];
+          break;
+        }
+      }
+      return updated_A10;
     } catch (e) {
       throw CustomError(errMsg: e.toString());
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/pages/scan_page.dart';
+import 'package:geo_j/pages/signup_page.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/providers/signin/signin_state.dart';
 import 'package:geo_j/utils/error_dialog.dart';
@@ -119,21 +120,21 @@ class _SigninPageState extends State<SigninPage> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    // TextButton(
-                    //   onPressed:
-                    //       signinState.signinStatus == SigninStatus.submitting
-                    //           ? null
-                    //           : () {
-                    //               Navigator.pushNamed(
-                    //                   context, SignupPage.routeName);
-                    //             },
-                    //   child: Text('문제가 있으신가요? 관리자에게 문의하세요'),
-                    //   style: TextButton.styleFrom(
-                    //       textStyle: TextStyle(
-                    //     fontSize: 20.0,
-                    //     decoration: TextDecoration.underline,
-                    //   )),
-                    // )
+                    TextButton(
+                      onPressed:
+                          signinState.signinStatus == SigninStatus.submitting
+                              ? null
+                              : () {
+                                  Navigator.pushNamed(
+                                      context, SignupPage.routeName);
+                                },
+                      child: Text('문제가 있으신가요? 관리자에게 문의하세요'),
+                      style: TextButton.styleFrom(
+                          textStyle: TextStyle(
+                        fontSize: 20.0,
+                        decoration: TextDecoration.underline,
+                      )),
+                    )
                   ],
                 ),
               ),

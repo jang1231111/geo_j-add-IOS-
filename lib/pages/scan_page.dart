@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
 import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/pages/signin_page.dart';
 import 'package:geo_j/providers/active_shipping_count/active_shipping_count_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
+import 'package:geo_j/repositories/gps_data_repositories.dart';
 import 'package:geo_j/utils/debounce.dart';
 import 'package:geo_j/utils/bluetooth.dart';
 import 'package:geo_j/utils/error_dialog.dart';
@@ -16,6 +19,7 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
+import 'package:location/location.dart' as loc;
 
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
@@ -143,26 +147,84 @@ class ShowDevices extends StatefulWidget {
 }
 
 class _ShowDevicesState extends State<ShowDevices> {
-  late final devices;
+  loc.Location location = loc.Location();
+  loc.LocationData? _locationData;
+  late Timer gpsTimer;
+  late Timer scanTimer;
+
   ScanResult? recentDevice;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      devices = context.read<SigninProvider>().state.signinInfo.devices;
-      permissionRequest();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await enableLocationService();
+      await permissionRequest();
+      getCurrentLocation();
+      gpsTimerInit();
+      scanListerInit();
+      scanTimerInit();
     });
   }
 
-  void permissionRequest() async {
-    if (await Permission.bluetooth.request().isGranted) {
-      // scan();
+  @override
+  void dispose() {
+    gpsTimer.cancel();
+    scanTimer.cancel();
+    super.dispose();
+  }
+
+  Future<void> enableLocationService() async {
+    bool _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      Navigator.pushNamed(context, SigninPage.routeName);
+      if (!_serviceEnabled) {
+        return;
+      }
     }
   }
 
-  void scan() async {
+  Future<void> permissionRequest() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.bluetooth,
+    ].request();
+
+    if (statuses.values.every((element) => element.isGranted)) {
+      return;
+    }
+
+    await openAppSettings();
+    Navigator.pushNamed(context, SigninPage.routeName);
+  }
+
+  getCurrentLocation() async {
+    location.onLocationChanged.listen((loc.LocationData tempcurrentLocation) {
+      _locationData = tempcurrentLocation;
+
+      /// DebugLog
+      // print('lng: ' + tempcurrentLocation.longitude.toString());
+      // print('lat: ' + tempcurrentLocation.latitude.toString());
+    });
+  }
+
+  void gpsTimerInit() {
+    const duration = const Duration(minutes: 5);
+    // const duration = const Duration(seconds: 5);
+    gpsTimer = Timer.periodic(
+      duration,
+      (timer) {
+        SigninInfo signinInfo = context.read<SigninProvider>().state.signinInfo;
+        context
+            .read<GpsDataRepositories>()
+            .sendGpsData(_locationData, signinInfo);
+      },
+    );
+  }
+
+  void scanListerInit() async {
     var subscription = FlutterBluePlus.onScanResults.listen(
       (results) async {
         if (results.isNotEmpty) {
@@ -189,7 +251,6 @@ class _ShowDevicesState extends State<ShowDevices> {
 
             if (isUpdate) {
               bleStateListener(context, scanResult, serial);
-
               await scanResult.device.connect();
             }
           }
@@ -200,23 +261,56 @@ class _ShowDevicesState extends State<ShowDevices> {
     );
 
     FlutterBluePlus.cancelWhenScanComplete(subscription);
+  }
 
-    // int divisor = Platform.isAndroid ? 8 : 1;
+  scanTimerInit() async {
+    const duration = const Duration(minutes: 10);
+    const scanDelay = const Duration(seconds: 5);
+
+    ///  스캔 재시작 잘될 경우
+    scanTimer = Timer.periodic(
+      duration,
+      (_) async {
+        await FlutterBluePlus.stopScan();
+        await FlutterBluePlus.startScan(
+            timeout: const Duration(minutes: 10),
+            withNames: [
+              'T301',
+              'T305',
+              'T306',
+            ]);
+      },
+    );
+
+    /// 스캔 재시작 안먹을 경우
+    // scanTimer = Timer.periodic(
+    //   duration,
+    //   (_) async {
+    //     await FlutterBluePlus.stopScan();
+
+    //     Timer(
+    //       duration,
+    //       () async {
+    //         await FlutterBluePlus.startScan(
+    //             timeout: const Duration(minutes: 10),
+    //             withNames: [
+    //               'T301',
+    //               'T305',
+    //               'T306',
+    //             ]);
+    //       },
+    //     );
+    //   },
+    // );
+
+    // 첫 초기화, 스캔 시작
     await FlutterBluePlus.startScan(
-        timeout: const Duration(minutes: 7),
+        timeout: const Duration(minutes: 10),
         withNames: [
           'T301',
           'T305',
           'T306',
-        ]
-        // continuousUpdates: true,
-        // continuousDivisor: divisor,
-        );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+        ]);
   }
 
   @override
@@ -234,10 +328,7 @@ class _ShowDevicesState extends State<ShowDevices> {
         );
       },
       itemBuilder: (BuildContext context, int index) {
-        return
-            // Text('data');
-
-            DeviceItem(device: filteredDevices[index]);
+        return DeviceItem(device: filteredDevices[index]);
       },
     );
   }
@@ -271,7 +362,7 @@ class DeviceItem extends StatelessWidget {
                           decoration: BoxDecoration(
                               color: device.transportState == 1
                                   ? const Color.fromRGBO(136, 136, 136, 1)
-                                  : device.arrivalTime.isBefore(DateTime.now()
+                                  : device.datetime.isBefore(DateTime.now()
                                           .toLocal()
                                           .subtract(
                                               const Duration(minutes: 10)))
@@ -405,43 +496,47 @@ class DeviceItem extends StatelessWidget {
                             flex: 48,
                             child: Container(
                               alignment: Alignment.center,
-                              child: Text(device.transportState == 1
-                                      ? '배송 완료'
-                                      : 'strMapper'
-                                  // strMapper(
-                                  //     deviceList[index].connectionState),
-                                  // style: widget.device.transportState == 1
-                                  //     ? state_complete_green(context)
-                                  //     : stateStyle(
-                                  //         deviceList[index].connectionState),
-                                  ),
+                              child: Text(
+                                device.transportState == 1
+                                    ? '배송 완료'
+                                    : device.bleState,
+                                style: device.transportState == 1
+                                    ? state_complete_green(context)
+                                    : stateStyle(context, device.bleState),
+                              ),
                             ),
                           ),
                           Expanded(
                               flex: 13,
                               child: Container(
                                   alignment: Alignment.centerRight,
-                                  child: Image.asset(
-                                      'assets/images/flutter_logo.png',
-                                      // 'assets/images/temp_ic.png',
-                                      fit: BoxFit.fill),
+                                  child: device.temperature == -999
+                                      ? Text('')
+                                      : Image.asset(
+                                          // 'assets/images/flutter_logo.png',
+                                          'assets/images/temp_ic.png',
+                                          fit: BoxFit.fill),
                                   padding: const EdgeInsets.all(5))),
                           Expanded(
                               flex: 24,
                               child: Container(
-                                  child: Text(
-                                '${device.temperature}°C',
-                                style: Temp(context),
-                              ))),
+                                child: Text(
+                                  device.temperature == -999
+                                      ? ''
+                                      : '${device.temperature}°C',
+                                  style: Temp(context),
+                                ),
+                              )),
                           Expanded(
                             flex: 40,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // getbatteryImage(
-                                //     deviceList[index].getBattery()),
+                                getbatteryImage(context, device.battery),
                                 Text(
-                                  '${device.battery}%',
+                                  device.battery == -999
+                                      ? ''
+                                      : '${device.battery}%',
                                   style: Temp(context),
                                 )
                               ],
