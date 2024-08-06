@@ -38,6 +38,7 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_blue_plus: ^1.32.8
   location: ^7.0.0
+  wakelock: ^0.6.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -73,6 +74,7 @@ flutter:
     - assets/images/battery_50.png
     - assets/images/battery_75.png
     - assets/images/battery_100.png
+    - assets/images/background.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -154,7 +154,7 @@ class ApiServices {
 
       print('sendLogData : $data');
       print(response.body.toString());
-      final List<dynamic> responseBody = json.decode(response.body);
+      final Map<String, dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
         // throw WeatherException('Cannot get the location of $city');

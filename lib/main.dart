@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/pages/signin_page.dart';
+import 'package:geo_j/pages/signup_page.dart';
 import 'package:geo_j/pages/splash_page.dart';
 import 'package:geo_j/providers/active_shipping_count/active_shipping_count_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
@@ -95,6 +96,7 @@ class MyApp extends StatelessWidget {
         home: SplashPage(),
         routes: {
           SigninPage.routeName: (context) => SigninPage(),
+          SignupPage.routeName: (context) => SignupPage(),
           ScanPage.routeName: (context) => ScanPage(),
         },
       ),

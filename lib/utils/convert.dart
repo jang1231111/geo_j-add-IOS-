@@ -28,16 +28,22 @@ List<int> convertInt2Bytes(value, Endian order, int bytesSize) {
   }
 }
 
-LogData transformData(Uint8List notifyResult) {
+LogData transformData(Uint8List notifyResult, int dataCount) {
   return LogData(
       temperature: getLogTemperature(notifyResult),
       humidity: getLogHumidity(notifyResult),
-      timeStamp: getLogTime(notifyResult));
+      timeStamp: getLogTime(notifyResult, dataCount));
 }
 
-DateTime getLogTime(Uint8List fetchData) {
+DateTime getLogTime(Uint8List fetchData, int dataCount) {
   int tmp =
       ByteData.sublistView(fetchData.sublist(12, 16)).getInt32(0, Endian.big);
+
+  // 펌웨어 시간값 변경 , 10분
+  tmp = tmp - (9 * dataCount * 60);
+  // 10분 단위로 나눌 시 나머지
+  int remainder = tmp % (60 * 10);
+  tmp = tmp - remainder;
 
   DateTime time = DateTime.fromMillisecondsSinceEpoch(tmp * 1000, isUtc: true);
 

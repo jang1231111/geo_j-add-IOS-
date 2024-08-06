@@ -1,16 +1,15 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/log_data.dart';
-import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
-import 'package:geo_j/repositories/log_data_repositories.dart';
 import 'package:geo_j/utils/convert.dart';
 import 'package:provider/provider.dart';
 
 // StateListener
-void bleStateListener(
+StreamSubscription<BluetoothConnectionState> bleStateListener(
     BuildContext context, ScanResult scanResult, String deNumber) {
   BluetoothDevice device = scanResult.device;
 
@@ -20,16 +19,11 @@ void bleStateListener(
         context
             .read<SigninProvider>()
             .updateBleState(serial: deNumber, bleState: '온도센서 스캔 중');
-
-        // print(
-        //     "$deNumber Disconnected : ${device.disconnectReason?.code} ${device.disconnectReason?.description}");
       }
       if (state == BluetoothConnectionState.connected) {
         context
             .read<SigninProvider>()
             .updateBleState(serial: deNumber, bleState: '온도센서 연결 완료');
-        // print(
-        //     "$deNumber Connected : ${device.disconnectReason?.code} ${device.disconnectReason?.description}");
 
         var characteristic = await discoverCharacteristic(context, device);
         writeCharacteristic(scanResult, characteristic);
@@ -37,6 +31,8 @@ void bleStateListener(
     },
   );
   device.cancelWhenDisconnected(subscription, delayed: true, next: true);
+
+  return subscription;
 }
 
 /// DISCOVER
@@ -107,15 +103,14 @@ Future<void> notifyStream(
   BluetoothCharacteristic writeCharacteristic,
 ) async {
   final List<LogData> logDatas = [];
+  int dataCount = 72;
   final subscription =
       notifyCharacteristic.onValueReceived.listen((notifyResult) async {
-    print('notifyResult  test  $notifyResult');
-
     if (notifyResult[10] == 0x03) {
       Uint8List minmaxIndex = getMinMaxIndex(Uint8List.fromList(notifyResult));
 
-      int endStamp = threeBytesToint(minmaxIndex.sublist(0, 3));
-      int startStamp = endStamp - 72;
+      int endStamp = threeBytesToint(minmaxIndex.sublist(3, 6));
+      int startStamp = endStamp - dataCount;
 
       if (startStamp <= 0) {
         startStamp = 0;
@@ -135,10 +130,11 @@ Future<void> notifyStream(
       );
     }
     if (notifyResult[10] == 0x05) {
-      print('notifyResult5 $notifyResult');
-
-      LogData logData = transformData(Uint8List.fromList(notifyResult));
-      print(logData);
+      LogData logData = transformData(
+          Uint8List.fromList(
+            notifyResult,
+          ),
+          dataCount--);
       logDatas.add(logData);
     }
     if (notifyResult[10] == 0x06) {

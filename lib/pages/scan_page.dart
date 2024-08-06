@@ -20,6 +20,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'package:location/location.dart' as loc;
+import 'package:wakelock/wakelock.dart';
 
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
@@ -147,24 +148,26 @@ class ShowDevices extends StatefulWidget {
 }
 
 class _ShowDevicesState extends State<ShowDevices> {
+  List<ScanResult>? scanResults;
   loc.Location location = loc.Location();
   loc.LocationData? _locationData;
+  late Timer updateTimer;
   late Timer gpsTimer;
   late Timer scanTimer;
-
-  ScanResult? recentDevice;
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await Wakelock.enable();
       await enableLocationService();
       await permissionRequest();
       getCurrentLocation();
-      gpsTimerInit();
-      scanListerInit();
-      scanTimerInit();
+      startGpsTimer();
+      scanListener();
+      startUpdateTimer();
+      startScanTimer();
     });
   }
 
@@ -172,6 +175,7 @@ class _ShowDevicesState extends State<ShowDevices> {
   void dispose() {
     gpsTimer.cancel();
     scanTimer.cancel();
+    updateTimer.cancel();
     super.dispose();
   }
 
@@ -210,7 +214,7 @@ class _ShowDevicesState extends State<ShowDevices> {
     });
   }
 
-  void gpsTimerInit() {
+  void startGpsTimer() {
     const duration = const Duration(minutes: 5);
     // const duration = const Duration(seconds: 5);
     gpsTimer = Timer.periodic(
@@ -224,12 +228,31 @@ class _ShowDevicesState extends State<ShowDevices> {
     );
   }
 
-  void scanListerInit() async {
+  void scanListener() {
     var subscription = FlutterBluePlus.onScanResults.listen(
-      (results) async {
+      (results) {
         if (results.isNotEmpty) {
-          ScanResult scanResult = results.last;
-          if (recentDevice != null && recentDevice != results.last) {
+          scanResults = results;
+        }
+      },
+      onError: (e) => print(e),
+    );
+
+    FlutterBluePlus.cancelWhenScanComplete(subscription);
+  }
+
+  startUpdateTimer() async {
+    const duration = const Duration(seconds: 10);
+
+    updateTimer = Timer.periodic(
+      duration,
+      (_) async {
+        if (scanResults != null) {
+          List<ScanResult> lastScanResults = [];
+          lastScanResults.addAll(scanResults!);
+
+          for (int i = 0; i < lastScanResults.length; i++) {
+            ScanResult scanResult = lastScanResults[i];
             Uint8List advertiseData = Uint8List.fromList(
                 scanResult.advertisementData.manufacturerData.values.first);
 
@@ -239,35 +262,31 @@ class _ShowDevicesState extends State<ShowDevices> {
             String serial3 = advertiseData[7].toRadixString(16).padLeft(2, '0');
             String serial = serial1 + serial2 + serial3;
 
-            int tmp = ByteData.sublistView(advertiseData.sublist(10, 12))
-                .getInt16(0, Endian.big);
-
-            double temperature = tmp / 100;
-
-            int battery = advertiseData[14];
-
             bool isUpdate = context.read<SigninProvider>().updateAdvertise(
-                serial: serial, temeperature: temperature, battery: battery);
+                  serial: serial,
+                  advertiseData: advertiseData,
+                );
 
             if (isUpdate) {
-              bleStateListener(context, scanResult, serial);
-              await scanResult.device.connect();
+              StreamSubscription<BluetoothConnectionState>? subscription;
+              try {
+                subscription = bleStateListener(context, scanResult, serial);
+                await scanResult.device.connect();
+              } catch (e) {
+                print('기기 연결 BleException : ${e.toString()}');
+                subscription!.cancel();
+              }
+              break;
             }
           }
-          recentDevice = scanResult;
         }
       },
-      onError: (e) => print(e),
     );
-
-    FlutterBluePlus.cancelWhenScanComplete(subscription);
   }
 
-  scanTimerInit() async {
-    const duration = const Duration(minutes: 10);
-    const scanDelay = const Duration(seconds: 5);
+  startScanTimer() async {
+    const duration = const Duration(minutes: 1);
 
-    ///  스캔 재시작 잘될 경우
     scanTimer = Timer.periodic(
       duration,
       (_) async {
@@ -279,29 +298,12 @@ class _ShowDevicesState extends State<ShowDevices> {
               'T305',
               'T306',
             ]);
+
+        /// 상태관리 사용으로 인해, UI 리빌드가 필요할때를 제외하고 발생하지 않음
+        /// DateTime (파란불,빨간불) 이 시간이 지나도 상태관리를 이용한 변환이 없을시 리빌드가 이루어지지 않으므로 스캔 재시작 시마다 화면을 새로 그려준다
+        setState(() {});
       },
     );
-
-    /// 스캔 재시작 안먹을 경우
-    // scanTimer = Timer.periodic(
-    //   duration,
-    //   (_) async {
-    //     await FlutterBluePlus.stopScan();
-
-    //     Timer(
-    //       duration,
-    //       () async {
-    //         await FlutterBluePlus.startScan(
-    //             timeout: const Duration(minutes: 10),
-    //             withNames: [
-    //               'T301',
-    //               'T305',
-    //               'T306',
-    //             ]);
-    //       },
-    //     );
-    //   },
-    // );
 
     // 첫 초기화, 스캔 시작
     await FlutterBluePlus.startScan(
@@ -472,7 +474,7 @@ class DeviceItem extends StatelessWidget {
                             device.boxName,
                             style: M_Name(context),
                           ),
-                          device.arrivalTime.isBefore(DateTime.now()
+                          device.datetime.isBefore(DateTime.now()
                                   .toLocal()
                                   .subtract(Duration(days: 200)))
                               ? Text(
@@ -482,7 +484,7 @@ class DeviceItem extends StatelessWidget {
                               : Text(
                                   '최근 업로드 시간 : ' +
                                       DateFormat('d일 HH:mm:ss')
-                                          .format(device.arrivalTime),
+                                          .format(device.datetime),
                                   style: lastUpdateTextStyle(context),
                                 ),
                         ],

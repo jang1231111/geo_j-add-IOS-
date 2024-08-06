@@ -62,7 +62,7 @@ class _SigninPageState extends State<SigninPage> {
                   shrinkWrap: true,
                   children: [
                     Image.asset(
-                      'assets/images/flutter_logo.png',
+                      'assets/images/background.jpeg',
                       width: 250,
                       height: 250,
                     ),
@@ -120,7 +120,7 @@ class _SigninPageState extends State<SigninPage> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    TextButton(
+                    TextButton.icon(
                       onPressed:
                           signinState.signinStatus == SigninStatus.submitting
                               ? null
@@ -128,11 +128,12 @@ class _SigninPageState extends State<SigninPage> {
                                   Navigator.pushNamed(
                                       context, SignupPage.routeName);
                                 },
-                      child: Text('문제가 있으신가요? 관리자에게 문의하세요'),
+                      icon: Icon(Icons.question_answer),
+                      label: Text('관리자에게 문의하기'),
                       style: TextButton.styleFrom(
                           textStyle: TextStyle(
                         fontSize: 20.0,
-                        decoration: TextDecoration.underline,
+                        // decoration: TextDecoration.underline,
                       )),
                     )
                   ],

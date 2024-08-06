@@ -21,7 +21,7 @@ class ShipstateRepositories {
       A10? updated_A10;
 
       for (int i = 0; i < devices.length; i++) {
-        if (devices[i].deNumber == a10.deNumber) {
+        if (devices[i].boxName == a10.boxName) {
           updated_A10 = devices[i];
           break;
         }

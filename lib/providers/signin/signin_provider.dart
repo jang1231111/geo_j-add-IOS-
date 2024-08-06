@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/log_data.dart';
@@ -56,19 +58,16 @@ class SigninProvider with ChangeNotifier {
       final deviceList = _state.signinInfo.devices;
 
       for (int i = 0; i < deviceList.length; i++) {
-        if (deviceList[i].deNumber == updated_A10.deNumber) {
+        if (deviceList[i].boxName == updated_A10.boxName) {
           deviceList[i] = deviceList[i]
               .copyWith(transportState: updated_A10.transportState);
+          break;
         }
       }
 
       SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
 
       _state = _state.copyWith(signinInfo: signinInfo);
-      notifyListeners();
-
-      _state = _state.copyWith(
-          signinStatus: SigninStatus.success, signinInfo: signinInfo);
       notifyListeners();
     } on CustomError catch (e) {
       _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
@@ -102,10 +101,6 @@ class SigninProvider with ChangeNotifier {
 
       _state = _state.copyWith(signinInfo: signinInfo);
       notifyListeners();
-
-      _state = _state.copyWith(
-          signinStatus: SigninStatus.success, signinInfo: signinInfo);
-      notifyListeners();
     } on CustomError catch (e) {
       _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
       notifyListeners();
@@ -113,53 +108,41 @@ class SigninProvider with ChangeNotifier {
     }
   }
 
-  // Future<void> getDeviceList({
-  //   required String phoneNumber,
-  // }) async {
-  //   try {
-  //     final centerInfo = _state.signinInfo.centerInfo;
-  //     final deviceList =
-  //         await signinRepositories.getDeviceList(centerinfo: centerInfo);
-
-  //     SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
-
-  //     _state = _state.copyWith(signinInfo: signinInfo);
-  //     notifyListeners();
-  //   } on CustomError catch (e) {
-  //     _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
-  //     notifyListeners();
-  //     rethrow;
-  //   }
-  // }
-
-  bool updateAdvertise(
-      {required String serial,
-      required double temeperature,
-      required int battery}) {
+  bool updateAdvertise({
+    required String serial,
+    required Uint8List advertiseData,
+  }) {
     List<A10> devices = _state.signinInfo.devices;
+    bool isUpdate = false;
+
+    /// Temperature
+    int tmp = ByteData.sublistView(advertiseData.sublist(10, 12))
+        .getInt16(0, Endian.big);
+
+    double temperature = tmp / 100;
+
+    /// Battery
+    int battery = advertiseData[14];
 
     for (int i = 0; i < devices.length; i++) {
       if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
           serial.toLowerCase()) {
         devices[i] =
-            devices[i].copyWith(temperature: temeperature, battery: battery);
+            devices[i].copyWith(temperature: temperature, battery: battery);
 
         _state = _state.copyWith(
             signinInfo: _state.signinInfo.copyWith(devices: devices));
 
         notifyListeners();
-        // 데이터 전송 시간
+
+        // 데이터 전송 시간 체크
         if (devices[i].datetime.isBefore(
             DateTime.now().toLocal().subtract(Duration(minutes: 10)))) {
-          return true;
-        }
-        // 안해도 되는 시간
-        else {
-          return false;
+          isUpdate = true;
         }
       }
     }
-    return false;
+    return isUpdate;
   }
 
   void updateBleState({

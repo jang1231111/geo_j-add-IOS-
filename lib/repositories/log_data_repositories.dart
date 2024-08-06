@@ -33,13 +33,13 @@ class LogdataRepositories {
     try {
       await apiServices.sendLogData(
           a10, logDatas, signinInfo.centerInfo.sendLogDataUri);
-      final List<A10> deviceList =
+      final List<A10> newDevices =
           await apiServices.getDeviceList(signinInfo.centerInfo);
 
-      for (int i = 0; i < deviceList.length; i++) {
-        if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+      for (int i = 0; i < newDevices.length; i++) {
+        if (newDevices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
             serial.toLowerCase()) {
-          a10 = devices[i];
+          a10 = newDevices[i];
           break;
         }
       }

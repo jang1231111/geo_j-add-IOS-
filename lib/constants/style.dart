@@ -101,7 +101,25 @@ TextStyle login_ok(BuildContext context) {
 //optilo_name : 옵티로 이름 있는부분
 //optilo_info : 정보 있는부분
 
-TextStyle optilo_name(BuildContext context) {
+TextStyle question_title(BuildContext context) {
+  return TextStyle(
+    fontFamily: 'pretend',
+    fontSize: MediaQuery.of(context).size.height / 35,
+    color: Color.fromRGBO(50, 50, 50, 1),
+    fontWeight: FontWeight.w600,
+  );
+}
+
+TextStyle question_subtitle1(BuildContext context) {
+  return TextStyle(
+    fontFamily: 'pretend',
+    fontSize: MediaQuery.of(context).size.height / 40,
+    color: Color.fromRGBO(50, 50, 50, 1),
+    fontWeight: FontWeight.w600,
+  );
+}
+
+TextStyle question_subtitle2(BuildContext context) {
   return TextStyle(
     fontFamily: 'pretend',
     fontSize: MediaQuery.of(context).size.height / 60,
@@ -110,10 +128,28 @@ TextStyle optilo_name(BuildContext context) {
   );
 }
 
+TextStyle question_detail(BuildContext context) {
+  return TextStyle(
+    fontFamily: 'pretend',
+    fontSize: MediaQuery.of(context).size.height / 65,
+    color: Color.fromRGBO(50, 50, 50, 1),
+    fontWeight: FontWeight.w400,
+  );
+}
+
+TextStyle optilo_name(BuildContext context) {
+  return TextStyle(
+    fontFamily: 'pretend',
+    fontSize: MediaQuery.of(context).size.height / 45,
+    color: Color.fromRGBO(50, 50, 50, 1),
+    fontWeight: FontWeight.w600,
+  );
+}
+
 TextStyle optilo_info(BuildContext context) {
   return TextStyle(
     fontFamily: 'pretend',
-    fontSize: MediaQuery.of(context).size.height / 70,
+    fontSize: MediaQuery.of(context).size.height / 55,
     color: Color.fromRGBO(50, 50, 50, 1),
     fontWeight: FontWeight.w400,
   );
