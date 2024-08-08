@@ -26,7 +26,11 @@ StreamSubscription<BluetoothConnectionState> bleStateListener(
             .updateBleState(serial: deNumber, bleState: '온도센서 연결 완료');
 
         var characteristic = await discoverCharacteristic(context, device);
-        writeCharacteristic(scanResult, characteristic);
+        if (characteristic == null) {
+          await device.disconnect();
+        } else {
+          writeCharacteristic(scanResult, characteristic);
+        }
       }
     },
   );
@@ -36,10 +40,17 @@ StreamSubscription<BluetoothConnectionState> bleStateListener(
 }
 
 /// DISCOVER
-Future<BluetoothCharacteristic> discoverCharacteristic(
+Future<BluetoothCharacteristic?> discoverCharacteristic(
     BuildContext context, BluetoothDevice device) async {
-  List<BluetoothService> services = await device.discoverServices();
-  print('services : $services');
+  List<BluetoothService> services;
+
+  try {
+    services = await device.discoverServices();
+  } catch (e) {
+    print(
+        'discoverCharacteristic Err : ${e.toString()}  시간 : ${DateTime.now()}');
+    return null;
+  }
 
   BluetoothService service =
       services.firstWhere((service) => service.uuid.toString() == '1000');
@@ -76,22 +87,27 @@ void writeCharacteristic(
     int.parse(unixTimestamp.substring(6, 8), radix: 16),
   ]);
 
-  if (name == 'T301') {
-    await characteristic.write(
-      Uint8List.fromList(
-          [0x55, 0xAA, 0x01, 0x01] + macAdress + [0x02, 0x04] + timestamp),
-    );
-  } else if (name == 'T305') {
-    await characteristic.write(
-      Uint8List.fromList(
-          [0x55, 0xAA, 0x01, 0x5] + macAdress + [0x02, 0x04] + timestamp),
-    );
-  } else if (name == 'T306') {
-    await characteristic.write(
-      withoutResponse: true,
-      Uint8List.fromList(
-          [0x55, 0xAA, 0x01, 0x6] + macAdress + [0x02, 0x04] + timestamp),
-    );
+  try {
+    if (name == 'T301') {
+      await characteristic.write(
+        Uint8List.fromList(
+            [0x55, 0xAA, 0x01, 0x01] + macAdress + [0x02, 0x04] + timestamp),
+      );
+    } else if (name == 'T305') {
+      await characteristic.write(
+        Uint8List.fromList(
+            [0x55, 0xAA, 0x01, 0x5] + macAdress + [0x02, 0x04] + timestamp),
+      );
+    } else if (name == 'T306') {
+      await characteristic.write(
+        withoutResponse: true,
+        Uint8List.fromList(
+            [0x55, 0xAA, 0x01, 0x6] + macAdress + [0x02, 0x04] + timestamp),
+      );
+    }
+  } catch (e) {
+    print('writeCharacteristic Err : ${e.toString()}  시간 : ${DateTime.now()}');
+    await scanResult.device.disconnect();
   }
 }
 
@@ -120,14 +136,20 @@ Future<void> notifyStream(
           Uint8List.fromList(convertInt2Bytes(startStamp, Endian.big, 3));
       Uint8List endindex = minmaxIndex.sublist(3, 6);
 
-      writeCharacteristic.write(
-        withoutResponse: true,
-        Uint8List.fromList([0x55, 0xAA, 0x01, 0x06] +
-            notifyResult.sublist(4, 10).reversed.toList() +
-            [0x04, 0x06] +
-            startIndex +
-            endindex),
-      );
+      try {
+        writeCharacteristic.write(
+          withoutResponse: true,
+          Uint8List.fromList([0x55, 0xAA, 0x01, 0x06] +
+              notifyResult.sublist(4, 10).reversed.toList() +
+              [0x04, 0x06] +
+              startIndex +
+              endindex),
+        );
+      } catch (e) {
+        print(
+            'notifyStream03 Write Err : ${e.toString()}  시간 : ${DateTime.now()}');
+        await device.disconnect();
+      }
     }
     if (notifyResult[10] == 0x05) {
       LogData logData = transformData(
@@ -153,9 +175,6 @@ Future<void> notifyStream(
           serial: serial,
           logDatas: logDatas,
         );
-
-        /// 연결 종료
-        await device.disconnect();
       } on CustomError catch (e) {
         print('데이터 전송 실패 : ${e.toString()}');
 
@@ -164,10 +183,18 @@ Future<void> notifyStream(
             .read<SigninProvider>()
             .updateBleState(serial: serial, bleState: '데이터 전송 실패');
       }
+
+      /// 연결 종료
+      await device.disconnect();
     }
   });
 
   device.cancelWhenDisconnected(subscription);
 
-  await notifyCharacteristic.setNotifyValue(true);
+  try {
+    await notifyCharacteristic.setNotifyValue(true);
+  } catch (e) {
+    print(
+        'notifyStream setNotifyValue Err: ${e.toString()}   시간: ${DateTime.now()}');
+  }
 }

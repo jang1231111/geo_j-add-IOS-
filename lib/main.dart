@@ -18,7 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
+  // FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   runApp(const MyApp());
 }
 

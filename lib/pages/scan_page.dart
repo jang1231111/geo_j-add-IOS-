@@ -271,12 +271,27 @@ class _ShowDevicesState extends State<ShowDevices> {
               StreamSubscription<BluetoothConnectionState>? subscription;
               try {
                 subscription = bleStateListener(context, scanResult, serial);
-                await scanResult.device.connect();
+
+                /// 미연결 상태일 경우에만 연결 시도
+                if (scanResult.device.isDisconnected) {
+                  await scanResult.device
+                      .connect(timeout: Duration(seconds: 8));
+                }
+
+                /// 연결중일 경우, 연결만 해제
+                /// 재연결 안하는 이유: 블루투스 오류 방지를 위해, 한 주기(UpdateTimer : 10초) 쉬고 다음번 루틴 때 연결 처리
+                else {
+                  await scanResult.device.disconnect();
+                  subscription.cancel();
+                }
               } catch (e) {
-                print('기기 연결 BleException : ${e.toString()}');
+                print(
+                    '기기 연결 BleException : ${e.toString()}  시간 : ${DateTime.now()}');
                 subscription!.cancel();
               }
               break;
+            } else {
+              continue;
             }
           }
         }

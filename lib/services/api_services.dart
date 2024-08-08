@@ -40,7 +40,7 @@ class ApiServices {
         throw Exception('전화번호를 확인해 주세요');
       }
 
-      print(responseBody.toString());
+      // print(responseBody.toString());
       final centerInfo = Centerinfo.fromJson(responseBody);
 
       return centerInfo;
@@ -70,7 +70,7 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
-      print(response.body.toString());
+      // print(response.body.toString());
       final List<dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
@@ -79,7 +79,7 @@ class ApiServices {
 
       final deviceList = responseBody.map((i) => A10.fromJson(i)).toList();
 
-      print('Devicelist : $deviceList');
+      // print('Devicelist : $deviceList');
 
       return deviceList;
     } catch (e) {
@@ -152,8 +152,8 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
-      print('sendLogData : $data');
-      print(response.body.toString());
+      // print('sendLogData : $data');
+      // print(response.body.toString());
       final Map<String, dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
@@ -204,7 +204,7 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
-      print(response.body.toString());
+      // print(response.body.toString());
       final Map<String, dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
@@ -245,14 +245,14 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
-      print(response.body.toString());
+      // print(response.body.toString());
       final Map<String, dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
         // throw WeatherException('Cannot get the location of $city');
       }
 
-      print("GPS DATA" + data.toString());
+      // print("GPS DATA" + data.toString());
     } catch (e) {
       print('updateTransportState ERR');
       rethrow;
