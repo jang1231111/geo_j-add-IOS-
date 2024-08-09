@@ -33,8 +33,6 @@ class _SigninPageState extends State<SigninPage> {
 
     form.save();
 
-    print('phoneNumber: $_phoneNumber');
-
     try {
       await context.read<SigninProvider>().signin(phoneNumber: _phoneNumber!);
       Navigator.pushNamed(context, ScanPage.routeName);

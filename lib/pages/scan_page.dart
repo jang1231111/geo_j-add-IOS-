@@ -48,6 +48,14 @@ class ScanPage extends StatelessWidget {
               ),
             ),
           ),
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () async {
+          //     await FlPiP().enable(
+          //         ios: FlPiPiOSConfig(),
+          //         android: FlPiPAndroidConfig(
+          //             aspectRatio: const Rational.maxLandscape()));
+          //   },
+          // ),
         ),
       ),
     );
