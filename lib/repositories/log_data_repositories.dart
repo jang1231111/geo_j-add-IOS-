@@ -31,10 +31,8 @@ class LogdataRepositories {
 
     /// 데이터 전송
     try {
-      await apiServices.sendLogData(
-          a10, logDatas, signinInfo.centerInfo.sendLogDataUri);
-      final List<A10> newDevices =
-          await apiServices.getDeviceList(signinInfo.centerInfo);
+      // await apiServices.sendLogData(          a10, logDatas, signinInfo.centerInfo.sendLogDataUri);
+      final List<A10> newDevices = await apiServices.getDeviceList();
 
       for (int i = 0; i < newDevices.length; i++) {
         if (newDevices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==

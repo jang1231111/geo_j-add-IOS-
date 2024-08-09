@@ -7,13 +7,9 @@ class SigninRepositories {
 
   SigninRepositories({required this.apiServices});
 
-  Future<SigninInfo> signin({required String phoneNumber}) async {
+  Future<SigninInfo> signin() async {
     try {
-      final Centerinfo centerinfo =
-          await apiServices.getCenterInfo(phoneNumber);
-      // print('CenterInfo : $centerinfo');
-
-      final List<A10> deviceList = await apiServices.getDeviceList(centerinfo);
+      final List<A10> deviceList = await apiServices.getDeviceList();
 
       // for (int i = 0; i < deviceList.length; i++) {
       //   print('**********************');
@@ -21,8 +17,7 @@ class SigninRepositories {
       //   print('**********************');
       // }
 
-      SigninInfo signinInfo =
-          SigninInfo(centerInfo: centerinfo, devices: deviceList);
+      SigninInfo signinInfo = SigninInfo(devices: deviceList);
 
       return signinInfo;
     } catch (e) {

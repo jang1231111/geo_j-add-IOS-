@@ -1,1 +1,1 @@
-const String kLoginUri = 'http://geo.logithermo.com:3001/login';
+const String kLoginUri = 'http://gep.thermocert.net:18986/DSIT';

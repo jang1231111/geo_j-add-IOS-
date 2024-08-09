@@ -486,3 +486,75 @@ TextStyle stateStyle(BuildContext context, String input) {
     return state_end_gray(context);
   }
 }
+
+TextStyle macName(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(53, 53, 53, 1),
+    fontSize: MediaQuery.of(context).size.width / 18,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle startText(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(134, 134, 134, 1),
+    fontSize: MediaQuery.of(context).size.width / 25,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle startTime(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(53, 53, 53, 1),
+    fontSize: MediaQuery.of(context).size.width / 25,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle temp(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(53, 53, 53, 1),
+    fontSize: MediaQuery.of(context).size.width / 15,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle startButton(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(63, 63, 63, 1),
+    fontSize: MediaQuery.of(context).size.width / 27,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle startButton2(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(234, 80, 107, 1.0),
+    fontSize: MediaQuery.of(context).size.width / 27,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle endButton(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(255, 255, 255, 1),
+    fontSize: MediaQuery.of(context).size.width / 27,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'pretend',
+  );
+}
+
+TextStyle endButton2(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(234, 80, 107, 1.0),
+    fontSize: MediaQuery.of(context).size.width / 27,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'pretend',
+  );
+}

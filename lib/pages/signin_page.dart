@@ -34,7 +34,7 @@ class _SigninPageState extends State<SigninPage> {
     form.save();
 
     try {
-      await context.read<SigninProvider>().signin(phoneNumber: _phoneNumber!);
+      await context.read<SigninProvider>().signin();
       Navigator.pushNamed(context, ScanPage.routeName);
     } on CustomError catch (e) {
       errorDialog(context, e.toString());

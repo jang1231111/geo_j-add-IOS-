@@ -48,14 +48,6 @@ class ScanPage extends StatelessWidget {
               ),
             ),
           ),
-          // floatingActionButton: FloatingActionButton(
-          //   onPressed: () async {
-          //     await FlPiP().enable(
-          //         ios: FlPiPiOSConfig(),
-          //         android: FlPiPAndroidConfig(
-          //             aspectRatio: const Rational.maxLandscape()));
-          //   },
-          // ),
         ),
       ),
     );
@@ -366,213 +358,285 @@ class DeviceItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        children: [
-          Container(
-              decoration: BoxDecoration(
-                color: device.transportState == 1
-                    ? const Color.fromRGBO(179, 179, 179, 1)
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [mainbox()],
-              ),
-              height: MediaQuery.of(context).size.height * 0.20,
-              width: MediaQuery.of(context).size.width * 0.95,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      flex: 10,
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: device.transportState == 1
-                                  ? const Color.fromRGBO(136, 136, 136, 1)
-                                  : device.datetime.isBefore(DateTime.now()
-                                          .toLocal()
-                                          .subtract(
-                                              const Duration(minutes: 10)))
-                                      ? const Color.fromRGBO(30, 135, 74, 1)
-                                      : const Color.fromRGBO(227, 40, 53, 1),
-                              borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(10))),
-                          width: MediaQuery.of(context).size.width * 1,
-                          height: MediaQuery.of(context).size.height / 80)),
-                  Expanded(
-                      flex: 54,
-                      child: Row(
-                        children: [
-                          Expanded(
-                              flex: 19,
-                              child: SizedBox(
-                                child: TextButton(
-                                  onPressed: () async {
-                                    // deStatus = await storage.readAll();
-                                    // await destinationInfo(
-                                    //     context,
-                                    //     deviceList[index].destName,
-                                    //     deviceList[index].boxName,
-                                    //     deviceList[index].dbNm,
-                                    //     deviceList[index].shippingSeq);
-                                  },
-                                  child: Text(
-                                    device.transportState == 2
-                                        ? device.destination + ' (회송)'
-                                        : device.destination,
-                                    style: Locate(context),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                  ),
-                                ),
-                              )),
-                          Expanded(
-                              //종료버튼
-                              flex: 10,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color:
-                                        const Color.fromRGBO(235, 235, 235, 1),
-                                    boxShadow: [mainbox()],
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(30))),
-                                margin: const EdgeInsets.all(7),
-                                padding: const EdgeInsets.all(2),
-                                alignment: Alignment.center,
-                                child: InkWell(
-                                  onTap: () async {
-                                    int? transportState;
-                                    transportState =
-                                        await shipFinishDialog(context, device);
-                                    if (transportState != null) {
-                                      try {
-                                        print(transportState);
-                                        await context
-                                            .read<SigninProvider>()
-                                            .updateTransportState(
-                                                a10: device,
-                                                transportState: transportState);
-                                      } on CustomError catch (e) {
-                                        errorDialog(context, e.toString());
-                                      }
-                                    }
-                                  },
-                                  child: Text('종료', style: boldTextStyle),
-                                ),
-                              ))
-                        ],
-                      )),
-                  Expanded(
-                    // 여기는 내용이 없어요 그냥 라인 만들라고 만든거에요
-                    flex: 2,
-                    child: Row(
-                      // 중간line
-                      children: [
-                        Expanded(
-                            flex: 1,
-                            child: Container(
-                              height: 2,
-                            )),
-                        Expanded(
-                            flex: 80,
-                            child: Container(
-                              color: Color.fromRGBO(235, 235, 235, 1),
-                              height: 2,
-                              width: MediaQuery.of(context).size.width * 1,
-                            )),
-                        Expanded(
-                            flex: 1,
-                            child: Container(
-                              height: 2,
-                            ))
-                      ],
-                    ),
+      decoration:
+          BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
+      height: MediaQuery.of(context).size.height * 0.2,
+      width: MediaQuery.of(context).size.width * 0.9,
+      child: Column(children: [
+        Expanded(
+          flex: 5,
+          child: Container(
+            // padding: EdgeInsets.only(top: 5, bottom: 4, left: 2),
+            width: MediaQuery.of(context).size.width * 0.98,
+            decoration: BoxDecoration(
+                color: Color.fromRGBO(255, 255, 255, 1.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 18.0,
+                    spreadRadius: 2,
                   ),
-                  Expanded(
-                      flex: 52,
+                ],
+                borderRadius: BorderRadius.all(Radius.circular(15))),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                      padding: EdgeInsets.only(top: 3, left: 10, right: 10),
+                      width: MediaQuery.of(context).size.width * 1,
+                      decoration: BoxDecoration(
+                          color: Color.fromRGBO(201, 201, 201, 1),
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15))),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            device.boxName,
-                            style: M_Name(context),
+                          InkWell(
+                            //MAC어드레스 번호
+                            onTap: () async {},
+                            child: Text(
+                              device.deNumber,
+                              style: macName(context),
+                            ),
                           ),
-                          device.datetime.isBefore(DateTime.now()
-                                  .toLocal()
-                                  .subtract(Duration(days: 200)))
-                              ? Text(
-                                  '최근 업로드 시간 : --일 --:--:--',
-                                  style: UpLoad(context),
-                                )
-                              : Text(
-                                  '최근 업로드 시간 : ' +
-                                      DateFormat('d일 HH:mm:ss')
-                                          .format(device.datetime),
-                                  style: lastUpdateTextStyle(context),
-                                ),
+                          getbatteryImage(context, device.battery),
                         ],
                       )),
-                  Expanded(
-                      //
-                      flex: 56,
+                ),
+                Expanded(
+                    flex: 5,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                      width: MediaQuery.of(context).size.width * 1,
                       child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            flex: 48,
-                            child: Container(
-                              alignment: Alignment.center,
-                              child: Text(
-                                device.transportState == 1
-                                    ? '배송 완료'
-                                    : device.bleState,
-                                style: device.transportState == 1
-                                    ? state_complete_green(context)
-                                    : stateStyle(context, device.bleState),
-                              ),
+                            //시작시간,
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                //시작시간:
+
+                                Text('시작시간',
+                                    style: startText(context),
+                                    textAlign: TextAlign.start),
+                                device.arrivalTime != null
+                                    ? Text(
+                                        DateFormat('yyyy-MM-dd HH:mm')
+                                            .format(device.arrivalTime),
+                                        style: startTime(context),
+                                      )
+                                    : Text(
+                                        '시작 버튼을 눌러주세요.',
+                                        style: startTime(context),
+                                      ),
+                              ],
                             ),
                           ),
                           Expanded(
-                              flex: 13,
-                              child: Container(
-                                  alignment: Alignment.centerRight,
-                                  child: device.temperature == -999
-                                      ? Text('')
-                                      : Image.asset(
-                                          // 'assets/images/flutter_logo.png',
-                                          'assets/images/temp_ic.png',
-                                          fit: BoxFit.fill),
-                                  padding: const EdgeInsets.all(5))),
-                          Expanded(
-                              flex: 24,
-                              child: Container(
-                                child: Text(
-                                  device.temperature == -999
-                                      ? ''
-                                      : '${device.temperature}°C',
-                                  style: Temp(context),
-                                ),
-                              )),
-                          Expanded(
-                            flex: 40,
+                            //온도계이미지, 온도데이터
+                            flex: 1,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                getbatteryImage(context, device.battery),
-                                Text(
-                                  device.battery == -999
-                                      ? ''
-                                      : '${device.battery}%',
-                                  style: Temp(context),
+                                Image(
+                                  image:
+                                      AssetImage('images/ic_thermometer.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                                Container(
+                                  padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                  child: Text(
+                                    '${device.tempHigh}°C',
+                                    style: temp(context),
+                                  ),
                                 )
                               ],
                             ),
                           )
                         ],
-                      ))
-                ],
-              )),
-        ],
-      ),
+                      ),
+                    )),
+                // Expanded(
+                //   flex: 3,
+                //   child: Row(children: [
+                //     Expanded(
+                //       flex: 1,
+                //       child: Container(
+                //         decoration: BoxDecoration(
+                //             border: Border(
+                //                 top: BorderSide(
+                //                     color: Color.fromRGBO(222, 222, 222, 1),
+                //                     width: 0.7),
+                //                 right: BorderSide(
+                //                     color: Color.fromRGBO(222, 222, 222, 1),
+                //                     width: 0.7))),
+                //         child: TextButton(
+                //           onPressed: deviceList[index].startTime != null
+                //               ? () async {
+                //                   int result = await EndYesOrNoDialog(context);
+                //                   if (result == 1) {
+                //                     deviceList[index].startTime =
+                //                         new DateTime.now()
+                //                             .millisecondsSinceEpoch;
+                //                     print(deviceList[index].startTime);
+                //                     print(
+                //                         '몬가용de' + deviceList[index].deviceName);
+                //                     print(deviceList[index]
+                //                         .peripheral
+                //                         .identifier); //얘가 맥주소
+                //                     print(deviceList[index].peripheral.name);
+                //                     await DBHelper().createSavedShipTime(
+                //                       deviceList[index].peripheral.identifier,
+                //                       deviceList[index].startTime.toString(),
+                //                       //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
+                //                     );
+                //                     setState(() {
+                //                       endtype1 = false;
+                //                       startbuttonactive = false;
+                //                       stopbuttonactive = true;
+                //                     });
+                //                     Peripheral startpoint =
+                //                         deviceList[index].peripheral;
+
+                //                     print("인덱스 ㅎ" +
+                //                         deviceList[index].startTime.toString());
+                //                   }
+                //                 }
+                //               : () async {
+                //                   deviceList[index].startTime =
+                //                       new DateTime.now().millisecondsSinceEpoch;
+                //                   print(deviceList[index].startTime);
+                //                   print('몬가용de' + deviceList[index].deviceName);
+                //                   print(deviceList[index]
+                //                       .peripheral
+                //                       .identifier); //얘가 맥주소
+                //                   print(deviceList[index].peripheral.name);
+                //                   await DBHelper().createSavedShipTime(
+                //                     deviceList[index].peripheral.identifier,
+                //                     deviceList[index].startTime.toString(),
+                //                     //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
+                //                   );
+
+                //                   setState(() {
+                //                     endtype1 = false;
+                //                     startbuttonactive = false;
+                //                     stopbuttonactive = true;
+                //                   });
+                //                   Peripheral startpoint =
+                //                       deviceList[index].peripheral;
+
+                //                   print("인덱스 ㅎ" +
+                //                       deviceList[index].startTime.toString());
+                //                 },
+                //           child: deviceList[index].startTime != null
+                //               ? Text('온도 수집 중', style: startButton2(context))
+                //               : Text('시 작', style: startButton(context)),
+                //         ),
+                //       ),
+                //     ),
+                //     Expanded(
+                //         flex: 1,
+                //         child: Container(
+                //           // width:MediaQuery.of(context).size.width*0.5,
+                //           decoration: BoxDecoration(
+                //             color: Color.fromRGBO(240, 240, 240, 1),
+                //             // border: Border(top: BorderSide(
+                //             //     color: Color.fromRGBO(222,222,222, 1),
+                //             //     width:0.7),right: BorderSide(color:Color.fromRGBO(222,222,222, 1),width: 0.7))
+                //           ),
+
+                //           child: TextButton(
+                //             onPressed: deviceList[index].startTime == null
+                //                 ? () {
+                //                     showMyDialog_ShipFinish_Error(context2);
+                //                   }
+                //                 : () async {
+                //                     if (!connecting) {
+                //                       print("일부 전송");
+                //                       print("연결 시도: " +
+                //                           new DateTime.now()
+                //                               .toLocal()
+                //                               .toString());
+
+                //                       duration = 1;
+                //                       connecting = true;
+                //                       await connect(index, 0, 2);
+                //                       endTime = new DateTime.now()
+                //                           .millisecondsSinceEpoch;
+                //                       deferenceMillSeconds =
+                //                           endTime - deviceList[index].startTime;
+                //                     }
+                //                   },
+                //             child: deviceList[index].startTime == null
+                //                 ? Text(
+                //                     '일부  전송:' +
+                //                         deviceList[index].sendcount.toString(),
+                //                     style: endButton2(context),
+                //                   )
+                //                 : Text(
+                //                     '일부  전송:' +
+                //                         deviceList[index].sendcount.toString(),
+                //                     style: startButton(context),
+                //                   ),
+                //           ),
+                //         )),
+                //     Expanded(
+                //         flex: 1,
+                //         child: Container(
+                //           // width:MediaQuery.of(context).size.width*0.5,
+                //           decoration: BoxDecoration(
+                //               color: Color.fromRGBO(63, 63, 63, 1),
+                //               borderRadius: BorderRadius.only(
+                //                   bottomRight: Radius.circular(15))),
+                //           child: TextButton(
+                //             onPressed: deviceList[index].startTime == null
+                //                 ? () {
+                //                     showMyDialog_ShipFinish_Error(context2);
+                //                   }
+                //                 : () async {
+                //                     if (!connecting) {
+                //                       connecting = true;
+                //                       setState(() {
+                //                         endtype1 = true;
+                //                       });
+                //                       duration = 1;
+                //                       await connect(index, 0, 0);
+                //                       endTime = new DateTime.now()
+                //                           .millisecondsSinceEpoch;
+                //                       deferenceMillSeconds =
+                //                           endTime - deviceList[index].startTime;
+
+                //                       print("종료를 눌렀다.================");
+                //                     }
+                //                   },
+                //             child: deviceList[index].startTime == null
+                //                 ? Text(
+                //                     '종  료',
+                //                     style: endButton2(context),
+                //                   )
+                //                 : Text(
+                //                     '종  료',
+                //                     style: endButton(context),
+                //                   ),
+                //           ),
+                //         ))
+                //   ]),
+                // )
+              ],
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }

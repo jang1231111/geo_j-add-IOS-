@@ -18,7 +18,6 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  // FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   runApp(const MyApp());
 }
 
@@ -70,33 +69,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<DeviceSearchProvider>(
           create: (context) => DeviceSearchProvider(),
         ),
-        ProxyProvider<SigninProvider, ActiveShippingCountProvider>(
-          update: (BuildContext context, SigninProvider signinProvider,
-                  ActiveShippingCountProvider? _) =>
-              ActiveShippingCountProvider(signinProvider: signinProvider),
-        ),
-        ProxyProvider3<SigninProvider, DeviceFilterProvider,
-            DeviceSearchProvider, FilteredDevicesProvider>(
-          update: (
-            BuildContext context,
-            SigninProvider signinProvider,
-            DeviceFilterProvider deviceFilterProvider,
-            DeviceSearchProvider deviceSearchProvider,
-            FilteredDevicesProvider? _,
-          ) =>
-              FilteredDevicesProvider(
-                  deviceFilterProvider: deviceFilterProvider,
-                  deviceSearchProvider: deviceSearchProvider,
-                  signinProvider: signinProvider),
-        )
       ],
       child: MaterialApp(
         title: 'GEO_J',
         debugShowCheckedModeBanner: false,
         home: SplashPage(),
         routes: {
-          SigninPage.routeName: (context) => SigninPage(),
-          SignupPage.routeName: (context) => SignupPage(),
           ScanPage.routeName: (context) => ScanPage(),
         },
       ),

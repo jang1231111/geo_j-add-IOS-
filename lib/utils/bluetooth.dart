@@ -16,14 +16,14 @@ StreamSubscription<BluetoothConnectionState> bleStateListener(
   var subscription = device.connectionState.listen(
     (BluetoothConnectionState state) async {
       if (state == BluetoothConnectionState.disconnected) {
-        context
-            .read<SigninProvider>()
-            .updateBleState(serial: deNumber, bleState: '온도센서 스캔 중');
+        // context
+        //     .read<SigninProvider>()
+        //     .updateBleState(serial: deNumber, bleState: '온도센서 스캔 중');
       }
       if (state == BluetoothConnectionState.connected) {
-        context
-            .read<SigninProvider>()
-            .updateBleState(serial: deNumber, bleState: '온도센서 연결 완료');
+        // context
+        //     .read<SigninProvider>()
+        //     .updateBleState(serial: deNumber, bleState: '온도센서 연결 완료');
 
         var characteristic = await discoverCharacteristic(context, device);
         if (characteristic == null) {
@@ -178,10 +178,10 @@ Future<void> notifyStream(
       } on CustomError catch (e) {
         print('데이터 전송 실패 : ${e.toString()}');
 
-        /// 전송 실패
-        context
-            .read<SigninProvider>()
-            .updateBleState(serial: serial, bleState: '데이터 전송 실패');
+        // /// 전송 실패
+        // context
+        //     .read<SigninProvider>()
+        //     .updateBleState(serial: serial, bleState: '데이터 전송 실패');
       }
 
       /// 연결 종료

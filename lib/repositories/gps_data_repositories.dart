@@ -14,7 +14,7 @@ class GpsDataRepositories {
     }
 
     try {
-      await apiServices.sendGpsData(locationData, signinInfo);
+      // await apiServices.sendGpsData(locationData, signinInfo);
     } catch (e) {
       throw CustomError(errMsg: e.toString());
     }

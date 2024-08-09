@@ -5,72 +5,25 @@ import 'package:geo_j/models/log_data.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/services/http_error_handler.dart';
 import 'package:http/http.dart' as http;
-import 'package:location/location.dart';
 
 class ApiServices {
   final http.Client httpClient;
 
   ApiServices({required this.httpClient});
 
-  Future<Centerinfo> getCenterInfo(String phoneNumber) async {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    final Map<String, dynamic> response = new Map<String, dynamic>();
-    final Map<String, dynamic> common = new Map<String, dynamic>();
-
-    common['managerPn'] = phoneNumber;
-    response["common"] = common;
-    data["response"] = response;
-
+  Future<List<A10>> getDeviceList() async {
     var client = http.Client();
-    var uri = Uri.parse(kLoginUri);
 
     try {
-      final http.Response response = await client.post(uri,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(data));
+      final http.Response response = await client.post(Uri.parse(kLoginUri),
+          headers: {"Content-Type": "application/x-www-form-urlencoded"},
+          body: {"what_data": "DeviceList"});
 
       if (response.statusCode != 200) {
         throw Exception(httpErrorHandler(response));
       }
 
-      final responseBody = json.decode(response.body);
-
-      if (responseBody.toString() ==
-          '{msg: No Data In MANAGER_INFO, notice: []}') {
-        throw Exception('전화번호를 확인해 주세요');
-      }
-
-      // print(responseBody.toString());
-      final centerInfo = Centerinfo.fromJson(responseBody);
-
-      return centerInfo;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<List<A10>> getDeviceList(Centerinfo centerInfo) async {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    final Map<String, dynamic> response = new Map<String, dynamic>();
-    final Map<String, dynamic> common = new Map<String, dynamic>();
-
-    common['managerPn'] = centerInfo.managerPn;
-    response["common"] = common;
-    data["response"] = response;
-
-    var client = http.Client();
-    var uri = Uri.parse(centerInfo.getDeviceListUri);
-
-    try {
-      final http.Response response = await client.post(uri,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(data));
-
-      if (response.statusCode != 200) {
-        throw Exception(httpErrorHandler(response));
-      }
-
-      // print(response.body.toString());
+      print(response.body.toString());
       final List<dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
@@ -216,46 +169,46 @@ class ApiServices {
     }
   }
 
-  Future<void> sendGpsData(
-      LocationData locationData, SigninInfo signinInfo) async {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    final Map<String, dynamic> response = new Map<String, dynamic>();
-    final Map<String, dynamic> common = new Map<String, dynamic>();
-    final Map<String, dynamic> item = new Map<String, dynamic>();
-    final List<dynamic> itemlist = [];
+  // Future<void> sendGpsData(
+  //     LocationData locationData, SigninInfo signinInfo) async {
+  //   final Map<String, dynamic> data = new Map<String, dynamic>();
+  //   final Map<String, dynamic> response = new Map<String, dynamic>();
+  //   final Map<String, dynamic> common = new Map<String, dynamic>();
+  //   final Map<String, dynamic> item = new Map<String, dynamic>();
+  //   final List<dynamic> itemlist = [];
 
-    common['deNumber'] = signinInfo.centerInfo.managerPn;
+  //   common['deNumber'] = signinInfo.centerInfo.managerPn;
 
-    itemlist.add(new Map<String, dynamic>());
-    itemlist[0]["lat"] = locationData.latitude.toString();
-    itemlist[0]["lng"] = locationData.longitude.toString();
-    item["itemlist"] = itemlist;
-    response["item"] = item;
-    response["common"] = common;
-    data["response"] = response;
+  //   itemlist.add(new Map<String, dynamic>());
+  //   itemlist[0]["lat"] = locationData.latitude.toString();
+  //   itemlist[0]["lng"] = locationData.longitude.toString();
+  //   item["itemlist"] = itemlist;
+  //   response["item"] = item;
+  //   response["common"] = common;
+  //   data["response"] = response;
 
-    var client = http.Client();
-    var uri = Uri.parse(signinInfo.centerInfo.sendLogDataUri);
-    try {
-      final http.Response response = await client.post(uri,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(data));
+  //   var client = http.Client();
+  //   var uri = Uri.parse(signinInfo.centerInfo.sendLogDataUri);
+  //   try {
+  //     final http.Response response = await client.post(uri,
+  //         headers: {"Content-Type": "application/json"},
+  //         body: jsonEncode(data));
 
-      if (response.statusCode != 200) {
-        throw Exception(httpErrorHandler(response));
-      }
+  //     if (response.statusCode != 200) {
+  //       throw Exception(httpErrorHandler(response));
+  //     }
 
-      // print(response.body.toString());
-      final Map<String, dynamic> responseBody = json.decode(response.body);
+  //     // print(response.body.toString());
+  //     final Map<String, dynamic> responseBody = json.decode(response.body);
 
-      if (responseBody.isEmpty) {
-        // throw WeatherException('Cannot get the location of $city');
-      }
+  //     if (responseBody.isEmpty) {
+  //       // throw WeatherException('Cannot get the location of $city');
+  //     }
 
-      // print("GPS DATA" + data.toString());
-    } catch (e) {
-      print('updateTransportState ERR');
-      rethrow;
-    }
-  }
+  //     // print("GPS DATA" + data.toString());
+  //   } catch (e) {
+  //     print('updateTransportState ERR');
+  //     rethrow;
+  //   }
+  // }
 }
