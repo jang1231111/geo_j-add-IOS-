@@ -2,10 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
-import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/models/signin_info.dart';
 import 'package:geo_j/pages/signin_page.dart';
-import 'package:geo_j/providers/active_shipping_count/active_shipping_count_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
@@ -13,9 +11,6 @@ import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/repositories/gps_data_repositories.dart';
 import 'package:geo_j/utils/debounce.dart';
 import 'package:geo_j/utils/bluetooth.dart';
-import 'package:geo_j/utils/error_dialog.dart';
-import 'package:geo_j/widgets/shipping_dialog.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
@@ -67,7 +62,8 @@ class ScanHeader extends StatelessWidget {
           style: TextStyle(fontSize: 40.0),
         ),
         Text(
-          '남은 배송 건: ${context.watch<ActiveShippingCountProvider>().state.activeShippingCount}건',
+          // '스캔 개수: ${context.watch<ActiveShippingCountProvider>().state.activeShippingCount}건',
+          '스캔 개수',
           style: TextStyle(fontSize: 20.0, color: Colors.black),
         )
       ],
@@ -429,16 +425,17 @@ class DeviceItem extends StatelessWidget {
                                 Text('시작시간',
                                     style: startText(context),
                                     textAlign: TextAlign.start),
-                                device.arrivalTime != null
-                                    ? Text(
-                                        DateFormat('yyyy-MM-dd HH:mm')
-                                            .format(device.arrivalTime),
-                                        style: startTime(context),
-                                      )
-                                    : Text(
-                                        '시작 버튼을 눌러주세요.',
-                                        style: startTime(context),
-                                      ),
+                                // device.arrivalTime != null
+                                //     ? Text(
+                                //         DateFormat('yyyy-MM-dd HH:mm')
+                                //             .format(device.arrivalTime),
+                                //         style: startTime(context),
+                                //       )
+                                //     :
+                                Text(
+                                  '시작 버튼을 눌러주세요.',
+                                  style: startTime(context),
+                                ),
                               ],
                             ),
                           ),
@@ -450,13 +447,17 @@ class DeviceItem extends StatelessWidget {
                               children: [
                                 Image(
                                   image:
-                                      AssetImage('images/ic_thermometer.png'),
-                                  fit: BoxFit.cover,
+                                      AssetImage('assets/images/temp_ic.png'),
+                                  fit: BoxFit.contain,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.1,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.1,
                                 ),
                                 Container(
                                   padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                                   child: Text(
-                                    '${device.tempHigh}°C',
+                                    '${device.temperature}°C',
                                     style: temp(context),
                                   ),
                                 )
@@ -466,172 +467,184 @@ class DeviceItem extends StatelessWidget {
                         ],
                       ),
                     )),
-                // Expanded(
-                //   flex: 3,
-                //   child: Row(children: [
-                //     Expanded(
-                //       flex: 1,
-                //       child: Container(
-                //         decoration: BoxDecoration(
-                //             border: Border(
-                //                 top: BorderSide(
-                //                     color: Color.fromRGBO(222, 222, 222, 1),
-                //                     width: 0.7),
-                //                 right: BorderSide(
-                //                     color: Color.fromRGBO(222, 222, 222, 1),
-                //                     width: 0.7))),
-                //         child: TextButton(
-                //           onPressed: deviceList[index].startTime != null
-                //               ? () async {
-                //                   int result = await EndYesOrNoDialog(context);
-                //                   if (result == 1) {
-                //                     deviceList[index].startTime =
-                //                         new DateTime.now()
-                //                             .millisecondsSinceEpoch;
-                //                     print(deviceList[index].startTime);
-                //                     print(
-                //                         '몬가용de' + deviceList[index].deviceName);
-                //                     print(deviceList[index]
-                //                         .peripheral
-                //                         .identifier); //얘가 맥주소
-                //                     print(deviceList[index].peripheral.name);
-                //                     await DBHelper().createSavedShipTime(
-                //                       deviceList[index].peripheral.identifier,
-                //                       deviceList[index].startTime.toString(),
-                //                       //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
-                //                     );
-                //                     setState(() {
-                //                       endtype1 = false;
-                //                       startbuttonactive = false;
-                //                       stopbuttonactive = true;
-                //                     });
-                //                     Peripheral startpoint =
-                //                         deviceList[index].peripheral;
+                Expanded(
+                  flex: 3,
+                  child: Row(children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(
+                                top: BorderSide(
+                                    color: Color.fromRGBO(222, 222, 222, 1),
+                                    width: 0.7),
+                                right: BorderSide(
+                                    color: Color.fromRGBO(222, 222, 222, 1),
+                                    width: 0.7))),
+                        child: TextButton(
+                          onPressed: null,
+                          // deviceList[index].startTime != null
+                          //     ? () async {
+                          //         int result = await EndYesOrNoDialog(context);
+                          //         if (result == 1) {
+                          //           deviceList[index].startTime =
+                          //               new DateTime.now()
+                          //                   .millisecondsSinceEpoch;
+                          //           print(deviceList[index].startTime);
+                          //           print(
+                          //               '몬가용de' + deviceList[index].deviceName);
+                          //           print(deviceList[index]
+                          //               .peripheral
+                          //               .identifier); //얘가 맥주소
+                          //           print(deviceList[index].peripheral.name);
+                          //           await DBHelper().createSavedShipTime(
+                          //             deviceList[index].peripheral.identifier,
+                          //             deviceList[index].startTime.toString(),
+                          //             //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
+                          //           );
+                          //           setState(() {
+                          //             endtype1 = false;
+                          //             startbuttonactive = false;
+                          //             stopbuttonactive = true;
+                          //           });
+                          //           Peripheral startpoint =
+                          //               deviceList[index].peripheral;
 
-                //                     print("인덱스 ㅎ" +
-                //                         deviceList[index].startTime.toString());
-                //                   }
-                //                 }
-                //               : () async {
-                //                   deviceList[index].startTime =
-                //                       new DateTime.now().millisecondsSinceEpoch;
-                //                   print(deviceList[index].startTime);
-                //                   print('몬가용de' + deviceList[index].deviceName);
-                //                   print(deviceList[index]
-                //                       .peripheral
-                //                       .identifier); //얘가 맥주소
-                //                   print(deviceList[index].peripheral.name);
-                //                   await DBHelper().createSavedShipTime(
-                //                     deviceList[index].peripheral.identifier,
-                //                     deviceList[index].startTime.toString(),
-                //                     //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
-                //                   );
+                          //           print("인덱스 ㅎ" +
+                          //               deviceList[index].startTime.toString());
+                          //         }
+                          //       }
+                          //     : () async {
+                          //         deviceList[index].startTime =
+                          //             new DateTime.now().millisecondsSinceEpoch;
+                          //         print(deviceList[index].startTime);
+                          //         print('몬가용de' + deviceList[index].deviceName);
+                          //         print(deviceList[index]
+                          //             .peripheral
+                          //             .identifier); //얘가 맥주소
+                          //         print(deviceList[index].peripheral.name);
+                          //         await DBHelper().createSavedShipTime(
+                          //           deviceList[index].peripheral.identifier,
+                          //           deviceList[index].startTime.toString(),
+                          //           //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
+                          //         );
 
-                //                   setState(() {
-                //                     endtype1 = false;
-                //                     startbuttonactive = false;
-                //                     stopbuttonactive = true;
-                //                   });
-                //                   Peripheral startpoint =
-                //                       deviceList[index].peripheral;
+                          //         setState(() {
+                          //           endtype1 = false;
+                          //           startbuttonactive = false;
+                          //           stopbuttonactive = true;
+                          //         });
+                          //         Peripheral startpoint =
+                          //             deviceList[index].peripheral;
 
-                //                   print("인덱스 ㅎ" +
-                //                       deviceList[index].startTime.toString());
-                //                 },
-                //           child: deviceList[index].startTime != null
-                //               ? Text('온도 수집 중', style: startButton2(context))
-                //               : Text('시 작', style: startButton(context)),
-                //         ),
-                //       ),
-                //     ),
-                //     Expanded(
-                //         flex: 1,
-                //         child: Container(
-                //           // width:MediaQuery.of(context).size.width*0.5,
-                //           decoration: BoxDecoration(
-                //             color: Color.fromRGBO(240, 240, 240, 1),
-                //             // border: Border(top: BorderSide(
-                //             //     color: Color.fromRGBO(222,222,222, 1),
-                //             //     width:0.7),right: BorderSide(color:Color.fromRGBO(222,222,222, 1),width: 0.7))
-                //           ),
+                          //         print("인덱스 ㅎ" +
+                          //             deviceList[index].startTime.toString());
+                          //       },
+                          child: Text('시 작', style: startButton(context)),
+                          // deviceList[index].startTime != null
+                          //     ? Text('온도 수집 중', style: startButton2(context))
+                          //     : Text('시 작', style: startButton(context)),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: Container(
+                          // width:MediaQuery.of(context).size.width*0.5,
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(240, 240, 240, 1),
+                            // border: Border(top: BorderSide(
+                            //     color: Color.fromRGBO(222,222,222, 1),
+                            //     width:0.7),right: BorderSide(color:Color.fromRGBO(222,222,222, 1),width: 0.7))
+                          ),
 
-                //           child: TextButton(
-                //             onPressed: deviceList[index].startTime == null
-                //                 ? () {
-                //                     showMyDialog_ShipFinish_Error(context2);
-                //                   }
-                //                 : () async {
-                //                     if (!connecting) {
-                //                       print("일부 전송");
-                //                       print("연결 시도: " +
-                //                           new DateTime.now()
-                //                               .toLocal()
-                //                               .toString());
+                          child: TextButton(
+                              onPressed: null,
+                              // deviceList[index].startTime == null
+                              //     ? () {
+                              //         showMyDialog_ShipFinish_Error(context2);
+                              //       }
+                              //     : () async {
+                              //         if (!connecting) {
+                              //           print("일부 전송");
+                              //           print("연결 시도: " +
+                              //               new DateTime.now()
+                              //                   .toLocal()
+                              //                   .toString());
 
-                //                       duration = 1;
-                //                       connecting = true;
-                //                       await connect(index, 0, 2);
-                //                       endTime = new DateTime.now()
-                //                           .millisecondsSinceEpoch;
-                //                       deferenceMillSeconds =
-                //                           endTime - deviceList[index].startTime;
-                //                     }
-                //                   },
-                //             child: deviceList[index].startTime == null
-                //                 ? Text(
-                //                     '일부  전송:' +
-                //                         deviceList[index].sendcount.toString(),
-                //                     style: endButton2(context),
-                //                   )
-                //                 : Text(
-                //                     '일부  전송:' +
-                //                         deviceList[index].sendcount.toString(),
-                //                     style: startButton(context),
-                //                   ),
-                //           ),
-                //         )),
-                //     Expanded(
-                //         flex: 1,
-                //         child: Container(
-                //           // width:MediaQuery.of(context).size.width*0.5,
-                //           decoration: BoxDecoration(
-                //               color: Color.fromRGBO(63, 63, 63, 1),
-                //               borderRadius: BorderRadius.only(
-                //                   bottomRight: Radius.circular(15))),
-                //           child: TextButton(
-                //             onPressed: deviceList[index].startTime == null
-                //                 ? () {
-                //                     showMyDialog_ShipFinish_Error(context2);
-                //                   }
-                //                 : () async {
-                //                     if (!connecting) {
-                //                       connecting = true;
-                //                       setState(() {
-                //                         endtype1 = true;
-                //                       });
-                //                       duration = 1;
-                //                       await connect(index, 0, 0);
-                //                       endTime = new DateTime.now()
-                //                           .millisecondsSinceEpoch;
-                //                       deferenceMillSeconds =
-                //                           endTime - deviceList[index].startTime;
+                              //           duration = 1;
+                              //           connecting = true;
+                              //           await connect(index, 0, 2);
+                              //           endTime = new DateTime.now()
+                              //               .millisecondsSinceEpoch;
+                              //           deferenceMillSeconds =
+                              //               endTime - deviceList[index].startTime;
+                              //         }
+                              //       },
+                              child: Text(
+                                '일부  전송:',
+                                style: startButton(context),
+                              )
+                              // deviceList[index].startTime == null
+                              //     ? Text(
+                              //         '일부  전송:' +
+                              //             deviceList[index].sendcount.toString(),
+                              //         style: endButton2(context),
+                              //       )
+                              //     : Text(
+                              //         '일부  전송:' +
+                              //             deviceList[index].sendcount.toString(),
+                              //         style: startButton(context),
+                              // ),
+                              ),
+                        )),
+                    Expanded(
+                        flex: 1,
+                        child: Container(
+                          // width:MediaQuery.of(context).size.width*0.5,
+                          decoration: BoxDecoration(
+                              color: Color.fromRGBO(63, 63, 63, 1),
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(15))),
+                          child: TextButton(
+                            onPressed: null,
+                            // deviceList[index].startTime == null
+                            //     ? () {
+                            //         showMyDialog_ShipFinish_Error(context2);
+                            //       }
+                            //     : () async {
+                            //         if (!connecting) {
+                            //           connecting = true;
+                            //           setState(() {
+                            //             endtype1 = true;
+                            //           });
+                            //           duration = 1;
+                            //           await connect(index, 0, 0);
+                            //           endTime = new DateTime.now()
+                            //               .millisecondsSinceEpoch;
+                            //           deferenceMillSeconds =
+                            //               endTime - deviceList[index].startTime;
 
-                //                       print("종료를 눌렀다.================");
-                //                     }
-                //                   },
-                //             child: deviceList[index].startTime == null
-                //                 ? Text(
-                //                     '종  료',
-                //                     style: endButton2(context),
-                //                   )
-                //                 : Text(
-                //                     '종  료',
-                //                     style: endButton(context),
-                //                   ),
-                //           ),
-                //         ))
-                //   ]),
-                // )
+                            //           print("종료를 눌렀다.================");
+                            //         }
+                            //       },
+                            child: Text(
+                              '종  료',
+                              style: endButton(context),
+                            ),
+                            // deviceList[index].startTime == null
+                            //     ? Text(
+                            //         '종  료',
+                            //         style: endButton2(context),
+                            //       )
+                            //     : Text(
+                            //         '종  료',
+                            //         style: endButton(context),
+                            //       ),
+                          ),
+                        ))
+                  ]),
+                )
               ],
             ),
           ),

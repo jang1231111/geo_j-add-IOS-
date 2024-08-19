@@ -517,7 +517,7 @@ TextStyle startTime(BuildContext context) {
 TextStyle temp(BuildContext context) {
   return TextStyle(
     color: Color.fromRGBO(53, 53, 53, 1),
-    fontSize: MediaQuery.of(context).size.width / 15,
+    fontSize: MediaQuery.of(context).size.width / 20,
     fontWeight: FontWeight.w700,
     fontFamily: 'pretend',
   );

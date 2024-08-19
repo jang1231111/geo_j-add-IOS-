@@ -69,6 +69,25 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<DeviceSearchProvider>(
           create: (context) => DeviceSearchProvider(),
         ),
+        // ProxyProvider<SigninProvider, ActiveShippingCountProvider>(
+        //   update: (BuildContext context, SigninProvider signinProvider,
+        //           ActiveShippingCountProvider? _) =>
+        //       ActiveShippingCountProvider(signinProvider: signinProvider),
+        // ),
+        ProxyProvider3<SigninProvider, DeviceFilterProvider,
+            DeviceSearchProvider, FilteredDevicesProvider>(
+          update: (
+            BuildContext context,
+            SigninProvider signinProvider,
+            DeviceFilterProvider deviceFilterProvider,
+            DeviceSearchProvider deviceSearchProvider,
+            FilteredDevicesProvider? _,
+          ) =>
+              FilteredDevicesProvider(
+                  deviceFilterProvider: deviceFilterProvider,
+                  deviceSearchProvider: deviceSearchProvider,
+                  signinProvider: signinProvider),
+        )
       ],
       child: MaterialApp(
         title: 'GEO_J',

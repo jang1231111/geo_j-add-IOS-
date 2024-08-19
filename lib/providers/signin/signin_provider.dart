@@ -142,23 +142,23 @@ class SigninProvider with ChangeNotifier {
     return isUpdate;
   }
 
-  void updateBleState({
-    required String serial,
-    required String bleState,
-  }) async {
-    List<A10> devices = _state.signinInfo.devices;
+  // void updateBleState({
+  //   required String serial,
+  //   required String bleState,
+  // }) async {
+  //   List<A10> devices = _state.signinInfo.devices;
 
-    for (int i = 0; i < devices.length; i++) {
-      if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
-          serial.toLowerCase()) {
-        devices[i] = devices[i].copyWith(bleState: bleState);
-        break;
-      }
-    }
+  //   for (int i = 0; i < devices.length; i++) {
+  //     if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+  //         serial.toLowerCase()) {
+  //       devices[i] = devices[i].copyWith(bleState: bleState);
+  //       break;
+  //     }
+  //   }
 
-    _state = _state.copyWith(
-        signinInfo: _state.signinInfo.copyWith(devices: devices));
+  //   _state = _state.copyWith(
+  //       signinInfo: _state.signinInfo.copyWith(devices: devices));
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 }

@@ -1,5 +1,3 @@
-import 'package:geo_j/models/log_data.dart';
-
 enum Filter {
   all,
   active,
@@ -41,7 +39,7 @@ class A10 {
     required this.deNumber,
     required this.datetime,
     required this.deLocation,
-    this.temperature = -999,
+    this.temperature = -99,
     this.battery = -999,
   });
 

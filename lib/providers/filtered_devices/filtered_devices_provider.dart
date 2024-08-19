@@ -18,21 +18,23 @@ class FilteredDevicesProvider {
     List<A10> _filteredDevices;
     List<A10> _devices = signinProvider.state.signinInfo.devices;
 
-    switch (deviceFilterProvider.state.filter) {
-      case Filter.active:
-        _filteredDevices = _devices.where((A10 device) {
-          return device.transportState != 1;
-        }).toList();
-        break;
-      case Filter.completed:
-        _filteredDevices = _devices.where((A10 device) {
-          return device.transportState == 1;
-        }).toList();
-        break;
-      case Filter.all:
-        _filteredDevices = _devices;
-        break;
-    }
+    // switch (deviceFilterProvider.state.filter) {
+    //   case Filter.active:
+    //     _filteredDevices = _devices.where((A10 device) {
+    //       return device.transportState != 1;
+    //     }).toList();
+    //     break;
+    //   case Filter.completed:
+    //     _filteredDevices = _devices.where((A10 device) {
+    //       return device.transportState == 1;
+    //     }).toList();
+    //     break;
+    //   case Filter.all:
+    //     _filteredDevices = _devices;
+    //     break;
+    // }
+
+    _filteredDevices = _devices;
 
     if (deviceSearchProvider.state.searchTerm.isNotEmpty) {
       _filteredDevices = _filteredDevices

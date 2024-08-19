@@ -39,7 +39,7 @@ shipFinishDialog(BuildContext context, A10 a10) {
                     alignment: Alignment.center,
                     height: MediaQuery.of(context).size.height / 10,
                     width: MediaQuery.of(context).size.width * 0.7,
-                    child: Text('${a10.destination} ${a10.boxName}',
+                    child: Text('${a10.deNumber} ${a10.boxName}',
                         style: pop_name(context),
                         textScaleFactor: 1.0,
                         textAlign: TextAlign.center),

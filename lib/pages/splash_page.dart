@@ -11,6 +11,7 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+  
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         try {
