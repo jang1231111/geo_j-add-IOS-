@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Location information permission is required. (Always receive location information while using or app.)</string>
+	<key>NSSiriUsageDescription</key>
+    <string>$(PRODUCT_NAME) siri use.</string>
+	<key>NSMotionUsageDescription</key>
+    <string>$(PRODUCT_NAME) motion use.</string>
+	<key>NSCalendarsUsageDescription</key>
+    <string>$(PRODUCT_NAME) user your calendar.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -27,20 +35,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Your own description of the purpose.</string>
+	<string>This is for connecting Bluetooth thermometer models and devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Your own description of the purpose.</string>
+	<string>This is for connecting Bluetooth thermometer models and devices.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location when in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-		<string>bluetooth-central,location</string>
-	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
