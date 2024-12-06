@@ -22,7 +22,7 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
-      print(response.body.toString());
+      // print(response.body.toString());
       final List<dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {
@@ -31,7 +31,7 @@ class ApiServices {
 
       final deviceList = responseBody.map((i) => A10.fromJson(i)).toList();
 
-      // print('Devicelist : $deviceList');
+      print('Devicelist : $deviceList');
 
       return deviceList;
     } catch (e) {

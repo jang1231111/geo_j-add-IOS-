@@ -37,7 +37,7 @@ class ScanPage extends StatelessWidget {
                 children: [
                   ScanHeader(),
                   SizedBox(height: 20.0),
-                  SearchAndFilterDevice(),
+                  // SearchAndFilterDevice(),
                   ShowDevices(),
                 ],
               ),
