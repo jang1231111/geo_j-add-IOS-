@@ -61,6 +61,8 @@ class ApiServices {
     var client = http.Client();
     var uri = Uri.parse(centerInfo.getDeviceListUri);
 
+    // print(uri);
+
     try {
       final http.Response response = await client.post(uri,
           headers: {"Content-Type": "application/json"},
