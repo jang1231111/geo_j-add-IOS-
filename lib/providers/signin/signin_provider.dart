@@ -124,9 +124,9 @@ class SigninProvider with ChangeNotifier {
     for (int i = 0; i < devices.length; i++) {
       if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
           serial.toLowerCase()) {
-        devices[i] =
-            devices[i].copyWith(temperature: temperature, battery: battery);
-
+        final A10 updatedDevice = devices[i].copyWith(
+            temperature: temperature, battery: battery, scanned: true);
+        devices[i] = updatedDevice;
         _state = _state.copyWith(
             signinInfo: _state.signinInfo.copyWith(devices: devices));
 

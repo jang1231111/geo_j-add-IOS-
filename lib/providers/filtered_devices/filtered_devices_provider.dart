@@ -34,7 +34,9 @@ class FilteredDevicesProvider {
     //     break;
     // }
 
-    _filteredDevices = _devices;
+    _filteredDevices = _devices.where((A10 device) {
+      return device.scanned;
+    }).toList();
 
     if (deviceSearchProvider.state.searchTerm.isNotEmpty) {
       _filteredDevices = _filteredDevices

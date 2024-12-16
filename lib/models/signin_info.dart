@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 enum Filter {
   all,
   active,
@@ -32,15 +33,17 @@ class A10 {
   final DateTime datetime;
   final double temperature;
   final int battery;
+  final bool scanned;
   // final String bleState;
 
   A10({
     required this.boxName,
     required this.deNumber,
-    required this.datetime,
     required this.deLocation,
+    required this.datetime,
     this.temperature = -99,
     this.battery = -999,
+    this.scanned = false,
   });
 
   factory A10.fromJson(Map<String, dynamic> json) {
@@ -59,6 +62,7 @@ class A10 {
     DateTime? datetime,
     double? temperature,
     int? battery,
+    bool? scanned,
   }) {
     return A10(
       boxName: boxName ?? this.boxName,
@@ -67,11 +71,12 @@ class A10 {
       datetime: datetime ?? this.datetime,
       temperature: temperature ?? this.temperature,
       battery: battery ?? this.battery,
+      scanned: scanned ?? this.scanned,
     );
   }
 
   @override
   String toString() {
-    return 'A10(boxName: $boxName, deNumber: $deNumber, deLocation: $deLocation, datetime: $datetime, temperature: $temperature, battery: $battery)';
+    return 'A10(boxName: $boxName, deNumber: $deNumber, deLocation: $deLocation, datetime: $datetime, temperature: $temperature, battery: $battery, scanned: $scanned)';
   }
 }
