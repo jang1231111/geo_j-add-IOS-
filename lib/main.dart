@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<SigninProvider>(
           create: (context) => SigninProvider(
-            logdataRepositories: context.read<LogdataRepositories>(),
+            logDataRepositories: context.read<LogdataRepositories>(),
             signinRepositories: context.read<SigninRepositories>(),
             transportRepositories: context.read<ShipstateRepositories>(),
           ),

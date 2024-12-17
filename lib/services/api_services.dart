@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:geo_j/constants/constants.dart';
-import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/models/device/device_logdata_info.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/services/http_error_handler.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,6 +38,44 @@ class ApiServices {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> dsitSendLogData(
+      A10 a10, List<LogData> logDatas, String url) async {
+    String body = '';
+    for (int i = 0; i < logDatas.length; i++) {
+      body += '0' +
+          '|' +
+          "SENSOR_${a10.deNumber}" +
+          '|' +
+          logDatas[i].temperature.toString() +
+          '|' +
+          logDatas[i].humidity.toString() +
+          '|' +
+          a10.battery.toString() +
+          '|' +
+          '0' +
+          '|' +
+          '0' +
+          '|' +
+          logDatas[i].timeStamp.toString() +
+          '|' +
+          logDatas[i].timeStamp.toString() +
+          '|' +
+          '0' +
+          '|' +
+          '0' +
+          '|' +
+          '1' +
+          ';';
+    }
+
+    var client = http.Client();
+    var uristring = "http://gep.thermocert.net:19987";
+    var uri = Uri.parse(uristring);
+    print(uristring.toString());
+    var uriResponse = await client.post(uri, body: {"data": body});
+    print("Response: ${uriResponse.body}");
   }
 
   // Future<void> sendLogData(A10 a10, List<LogData> logDatas, String url) async {

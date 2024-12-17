@@ -16,11 +16,11 @@ class SigninProvider with ChangeNotifier {
   SigninProvider(
       {required this.signinRepositories,
       required this.transportRepositories,
-      required this.logdataRepositories});
+      required this.logDataRepositories});
 
   final SigninRepositories signinRepositories;
   final ShipstateRepositories transportRepositories;
-  final LogdataRepositories logdataRepositories;
+  final LogdataRepositories logDataRepositories;
 
   Future<void> signin() async {
     _state = _state.copyWith(signinStatus: SigninStatus.submitting);
@@ -78,7 +78,7 @@ class SigninProvider with ChangeNotifier {
     required List<LogData> logDatas,
   }) async {
     try {
-      final updated_A10 = await logdataRepositories.sendLogData(
+      final updated_A10 = await logDataRepositories.sendLogData(
           serial: serial, signinInfo: _state.signinInfo, logDatas: logDatas);
 
       if (updated_A10 == null) {
