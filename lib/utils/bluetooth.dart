@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:geo_j/models/custom_error.dart';
-import 'package:geo_j/models/log_data.dart';
+import 'package:geo_j/models/error/custom_error.dart';
+import 'package:geo_j/models/device/device_logdata_info.dart';
+import 'package:geo_j/pages/detail_page.dart';
+import 'package:geo_j/providers/device_log_data/device_log_data_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/convert.dart';
 import 'package:provider/provider.dart';
@@ -160,7 +162,10 @@ Future<void> notifyStream(
       logDatas.add(logData);
     }
     if (notifyResult[10] == 0x06) {
+      DeviceLogDataProvider deviceLogDataProvider =
+          context.read<DeviceLogDataProvider>();
       SigninProvider signinProvider = context.read<SigninProvider>();
+      final devices = signinProvider.state.signinInfo.devices;
 
       /// Serial
       List<int> serials = notifyResult.sublist(4, 7).reversed.toList();
@@ -171,10 +176,10 @@ Future<void> notifyStream(
 
       /// 온도 데이터 전송
       try {
-        await signinProvider.sendLogData(
-          serial: serial,
-          logDatas: logDatas,
-        );
+        await deviceLogDataProvider.sendLogData(
+            serial: serial, logDatas: logDatas, devices: devices);
+
+        Navigator.pushNamed(context, DetailPage.routeName);
       } on CustomError catch (e) {
         print('데이터 전송 실패 : ${e.toString()}');
 

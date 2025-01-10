@@ -1,10 +1,11 @@
-import 'package:geo_j/models/signin_info.dart';
+import 'package:flutter/material.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_state.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 
-class FilteredDevicesProvider {
+class FilteredDevicesProvider extends ChangeNotifier {
   final DeviceFilterProvider deviceFilterProvider;
   final DeviceSearchProvider deviceSearchProvider;
   final SigninProvider signinProvider;
@@ -49,5 +50,17 @@ class FilteredDevicesProvider {
     // print('_filteredDevices $_filteredDevices');
 
     return FilteredDevicesState(filteredDevices: _filteredDevices);
+  }
+
+  void updateStartTime(A10 device) {
+    final updateDevice = device.copyWith(startTime: new DateTime.now());
+
+    final devices = state.filteredDevices;
+    for (var i = 0; i < devices.length; i++) {
+      if (devices[i].deNumber == device.deNumber) {
+        devices[i] = updateDevice;
+      }
+    }
+    notifyListeners();
   }
 }

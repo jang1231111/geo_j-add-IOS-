@@ -379,6 +379,16 @@ TextStyle cordpop_complete(BuildContext context) {
   );
 }
 
+TextStyle subTitle(BuildContext context) {
+  return TextStyle(
+    color: Color.fromRGBO(51, 51, 51, 1),
+    fontSize: MediaQuery.of(context).size.width / 35,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'pretend',
+  );
+}
+
+
 //앱과 기기 사이에 데이터 전송 상태에 따른 색상
 //state_sending_orage:데이터전송중
 //state_complete_green: 데이터 전송완료
@@ -558,3 +568,4 @@ TextStyle endButton2(BuildContext context) {
     fontFamily: 'pretend',
   );
 }
+

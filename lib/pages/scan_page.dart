@@ -2,11 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
-import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/pages/signin_page.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
+import 'package:geo_j/providers/scan_result/scan_result_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/repositories/gps_data_repositories.dart';
 import 'package:geo_j/utils/debounce.dart';
@@ -244,6 +245,8 @@ class _ShowDevicesState extends State<ShowDevices> {
       duration,
       (_) async {
         if (scanResults != null) {
+          context.read<ScanResultProvider>().updateScanResult(scanResults!);
+
           List<ScanResult> lastScanResults = [];
           lastScanResults.addAll(scanResults!);
 
@@ -258,37 +261,38 @@ class _ShowDevicesState extends State<ShowDevices> {
             String serial3 = advertiseData[7].toRadixString(16).padLeft(2, '0');
             String serial = serial1 + serial2 + serial3;
 
-            bool isUpdate = context.read<SigninProvider>().updateAdvertise(
+            bool isDataUpdate = context.read<SigninProvider>().updateAdvertise(
                   serial: serial,
                   advertiseData: advertiseData,
                 );
 
-            if (isUpdate) {
-              StreamSubscription<BluetoothConnectionState>? subscription;
-              try {
-                subscription = bleStateListener(context, scanResult, serial);
+            /// 자동 데이터 전송 임시 주석 처리
+            // if (isDataUpdate) {
+            //   StreamSubscription<BluetoothConnectionState>? subscription;
+            //   try {
+            //     subscription = bleStateListener(context, scanResult, serial);
 
-                /// 미연결 상태일 경우에만 연결 시도
-                if (scanResult.device.isDisconnected) {
-                  await scanResult.device
-                      .connect(timeout: Duration(seconds: 8));
-                }
+            //     /// 미연결 상태일 경우에만 연결 시도
+            //     if (scanResult.device.isDisconnected) {
+            //       await scanResult.device
+            //           .connect(timeout: Duration(seconds: 8));
+            //     }
 
-                /// 연결중일 경우, 연결만 해제
-                /// 재연결 안하는 이유: 블루투스 오류 방지를 위해, 한 주기(UpdateTimer : 10초) 쉬고 다음번 루틴 때 연결 처리
-                else {
-                  await scanResult.device.disconnect();
-                  subscription.cancel();
-                }
-              } catch (e) {
-                print(
-                    '기기 연결 BleException : ${e.toString()}  시간 : ${DateTime.now()}');
-                subscription!.cancel();
-              }
-              break;
-            } else {
-              continue;
-            }
+            //     /// 연결중일 경우, 연결만 해제
+            //     /// 재연결 안하는 이유: 블루투스 오류 방지를 위해, 한 주기(UpdateTimer : 10초) 쉬고 다음번 루틴 때 연결 처리
+            //     else {
+            //       await scanResult.device.disconnect();
+            //       subscription.cancel();
+            //     }
+            //   } catch (e) {
+            //     print(
+            //         '기기 연결 BleException : ${e.toString()}  시간 : ${DateTime.now()}');
+            //     subscription!.cancel();
+            //   }
+            //   break;
+            // } else {
+            //   continue;
+            // }
           }
         }
       },
@@ -347,9 +351,24 @@ class _ShowDevicesState extends State<ShowDevices> {
   }
 }
 
-class DeviceItem extends StatelessWidget {
+class DeviceItem extends StatefulWidget {
   final A10 device;
   const DeviceItem({super.key, required this.device});
+
+  @override
+  State<DeviceItem> createState() => _DeviceItemState();
+}
+
+class _DeviceItemState extends State<DeviceItem> {
+  bool connecting = false;
+  late List<ScanResult> scanResults;
+
+  @override
+  void initState() {
+    super.initState();
+
+    scanResults = context.read<ScanResultProvider>().state.scanResuls;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -396,11 +415,11 @@ class DeviceItem extends StatelessWidget {
                             //MAC어드레스 번호
                             onTap: () async {},
                             child: Text(
-                              device.deNumber,
+                              widget.device.deNumber,
                               style: macName(context),
                             ),
                           ),
-                          getbatteryImage(context, device.battery),
+                          getbatteryImage(context, widget.device.battery),
                         ],
                       )),
                 ),
@@ -457,7 +476,7 @@ class DeviceItem extends StatelessWidget {
                                 Container(
                                   padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                                   child: Text(
-                                    '${device.temperature}°C',
+                                    '${widget.device.temperature}°C',
                                     style: temp(context),
                                   ),
                                 )
@@ -482,68 +501,18 @@ class DeviceItem extends StatelessWidget {
                                     color: Color.fromRGBO(222, 222, 222, 1),
                                     width: 0.7))),
                         child: TextButton(
-                          onPressed: null,
-                          // deviceList[index].startTime != null
-                          //     ? () async {
-                          //         int result = await EndYesOrNoDialog(context);
-                          //         if (result == 1) {
-                          //           deviceList[index].startTime =
-                          //               new DateTime.now()
-                          //                   .millisecondsSinceEpoch;
-                          //           print(deviceList[index].startTime);
-                          //           print(
-                          //               '몬가용de' + deviceList[index].deviceName);
-                          //           print(deviceList[index]
-                          //               .peripheral
-                          //               .identifier); //얘가 맥주소
-                          //           print(deviceList[index].peripheral.name);
-                          //           await DBHelper().createSavedShipTime(
-                          //             deviceList[index].peripheral.identifier,
-                          //             deviceList[index].startTime.toString(),
-                          //             //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
-                          //           );
-                          //           setState(() {
-                          //             endtype1 = false;
-                          //             startbuttonactive = false;
-                          //             stopbuttonactive = true;
-                          //           });
-                          //           Peripheral startpoint =
-                          //               deviceList[index].peripheral;
-
-                          //           print("인덱스 ㅎ" +
-                          //               deviceList[index].startTime.toString());
-                          //         }
-                          //       }
-                          //     : () async {
-                          //         deviceList[index].startTime =
-                          //             new DateTime.now().millisecondsSinceEpoch;
-                          //         print(deviceList[index].startTime);
-                          //         print('몬가용de' + deviceList[index].deviceName);
-                          //         print(deviceList[index]
-                          //             .peripheral
-                          //             .identifier); //얘가 맥주소
-                          //         print(deviceList[index].peripheral.name);
-                          //         await DBHelper().createSavedShipTime(
-                          //           deviceList[index].peripheral.identifier,
-                          //           deviceList[index].startTime.toString(),
-                          //           //DateFormat('yyyy-MM-dd - HH:mm').format(deviceList[index].startTime),
-                          //         );
-
-                          //         setState(() {
-                          //           endtype1 = false;
-                          //           startbuttonactive = false;
-                          //           stopbuttonactive = true;
-                          //         });
-                          //         Peripheral startpoint =
-                          //             deviceList[index].peripheral;
-
-                          //         print("인덱스 ㅎ" +
-                          //             deviceList[index].startTime.toString());
-                          //       },
-                          child: Text('시 작', style: startButton(context)),
-                          // deviceList[index].startTime != null
-                          //     ? Text('온도 수집 중', style: startButton2(context))
-                          //     : Text('시 작', style: startButton(context)),
+                          onPressed: () {
+                            // 확인용 Dialog
+                            // int result ƒ= await EndYesOrNoDialog(context);
+                            // if (result == 1) {
+                            context
+                                .read<FilteredDevicesProvider>()
+                                .updateStartTime(widget.device);
+                            // }ƒ
+                          },
+                          child: widget.device.startTime != null
+                              ? Text('온도 수집 중', style: startButton2(context))
+                              : Text('시 작', style: startButton(context)),
                         ),
                       ),
                     ),
@@ -559,28 +528,82 @@ class DeviceItem extends StatelessWidget {
                           ),
 
                           child: TextButton(
-                              onPressed: null,
-                              // deviceList[index].startTime == null
-                              //     ? () {
-                              //         showMyDialog_ShipFinish_Error(context2);
-                              //       }
-                              //     : () async {
-                              //         if (!connecting) {
-                              //           print("일부 전송");
-                              //           print("연결 시도: " +
-                              //               new DateTime.now()
-                              //                   .toLocal()
-                              //                   .toString());
+                              onPressed: () async {
+                                // widget.device.startTime == null
+                                //     ? () {
+                                //         // Err Dialog
+                                //         // showMyDialog_ShipFinish_Error(context2);
+                                //       }
+                                //     : () async {
+                                if (!connecting) {
+                                  StreamSubscription<BluetoothConnectionState>?
+                                      subscription;
+                                  try {
+                                    ScanResult scanResult;
 
-                              //           duration = 1;
-                              //           connecting = true;
-                              //           await connect(index, 0, 2);
-                              //           endTime = new DateTime.now()
-                              //               .millisecondsSinceEpoch;
-                              //           deferenceMillSeconds =
-                              //               endTime - deviceList[index].startTime;
-                              //         }
-                              //       },
+                                    for (var i = 0;
+                                        i < scanResults.length;
+                                        i++) {
+                                      Uint8List advertiseData =
+                                          Uint8List.fromList(scanResults[i]
+                                              .advertisementData
+                                              .manufacturerData
+                                              .values
+                                              .first);
+
+                                      /// Serial 6 자리  ex)1903CE
+                                      String serial1 = advertiseData[5]
+                                          .toRadixString(16)
+                                          .padLeft(2, '0');
+                                      String serial2 = advertiseData[6]
+                                          .toRadixString(16)
+                                          .padLeft(2, '0');
+                                      String serial3 = advertiseData[7]
+                                          .toRadixString(16)
+                                          .padLeft(2, '0');
+                                      String serial =
+                                          serial1 + serial2 + serial3;
+
+                                      if (widget.device.deNumber == serial) {
+                                        scanResult = scanResults[i];
+
+                                        /// 데이터 연결 루틴 시작
+                                        subscription = bleStateListener(
+                                            context, scanResult, serial);
+
+                                        /// 미연결 상태일 경우에만 연결 시도
+                                        if (scanResult.device.isDisconnected) {
+                                          await scanResult.device.connect(
+                                              timeout: Duration(seconds: 8));
+                                          connecting = true;
+                                        }
+
+                                        /// 연결중일 경우, 연결만 해제
+                                        /// 재연결 안하는 이유: 블루투스 오류 방지를 위해, 한 주기(UpdateTimer : 10초) 쉬고 다음번 루틴 때 연결 처리
+                                        else {
+                                          await scanResult.device.disconnect();
+                                          subscription.cancel();
+                                        }
+                                      }
+                                    }
+                                  } catch (e) {
+                                    print(
+                                        '기기 연결 BleException : ${e.toString()}  시간 : ${DateTime.now()}');
+                                    subscription!.cancel();
+                                  }
+
+                                  //////////
+
+                                  // duration = 1;
+                                  // connecting = true;
+                                  // await connect(index, 0, 2);
+                                  // endTime = new DateTime.now()
+                                  //     .millisecondsSinceEpoch;
+                                  // deferenceMillSeconds = endTime -
+                                  //     deviceList[index].startTime;
+                                }
+                                // };
+                              },
                               child: Text(
                                 '일부  전송:',
                                 style: startButton(context),

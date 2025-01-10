@@ -74,8 +74,13 @@ class MyApp extends StatelessWidget {
         //           ActiveShippingCountProvider? _) =>
         //       ActiveShippingCountProvider(signinProvider: signinProvider),
         // ),
-        ProxyProvider3<SigninProvider, DeviceFilterProvider,
+        ChangeNotifierProxyProvider3<SigninProvider, DeviceFilterProvider,
             DeviceSearchProvider, FilteredDevicesProvider>(
+          create: (_) => FilteredDevicesProvider(
+            deviceFilterProvider: context.read<DeviceFilterProvider>(),
+            deviceSearchProvider: context.read<DeviceSearchProvider>(),
+            signinProvider: context.read<SigninProvider>(),
+          ),
           update: (
             BuildContext context,
             SigninProvider signinProvider,
