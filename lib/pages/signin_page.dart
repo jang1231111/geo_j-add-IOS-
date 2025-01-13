@@ -5,6 +5,7 @@ import 'package:geo_j/pages/signup_page.dart';
 import 'package:geo_j/pages/support_page.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/providers/signin/signin_state.dart';
+import 'package:geo_j/providers/user/user_provider.dart';
 import 'package:geo_j/utils/error_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +39,23 @@ class _SigninPageState extends State<SigninPage> {
       await context.read<SigninProvider>().signin(phoneNumber: _phoneNumber!);
       Navigator.pushNamed(context, ScanPage.routeName);
     } on CustomError catch (e) {
-      errorDialog(context, e.toString());
+      // try {
+        print(e.toString());
+        final users = await context.read<UserProvider>().users;
+        final isUserExist = users.any((user) => user.phone == _phoneNumber);
+
+        if (isUserExist) {
+          // 내부 DB 검색 성공 시, 다음 동작 수행
+          Navigator.pushNamed(context, ScanPage.routeName);
+        } else {
+          // 사용자 정보가 없는 경우 CustomError 발생
+          throw CustomError(errMsg: '내부 DB에서도 사용자를 찾을 수 없습니다.');
+        }
+      // } on CustomError catch (dbError) {
+      //   errorDialog(context, '사용자를 찾을 수 없습니다.');
+      //   print('dbError : ${dbError.toString()}');
+      //   // 내부 DB 검색 중 오류가 발생한 경우
+      // }
     }
   }
 
@@ -124,7 +141,7 @@ class _SigninPageState extends State<SigninPage> {
                           signinState.signinStatus == SigninStatus.submitting
                               ? null
                               : () {
-                                  Navigator.pushNamed( 
+                                  Navigator.pushNamed(
                                       context, SignUpPage.routeName);
                                 },
                       icon: Icon(Icons.person_add),

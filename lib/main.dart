@@ -10,6 +10,7 @@ import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
+import 'package:geo_j/providers/user/user_provider.dart';
 import 'package:geo_j/repositories/gps_data_repositories.dart';
 import 'package:geo_j/repositories/log_data_repositories.dart';
 import 'package:geo_j/repositories/signin_repositories.dart';
@@ -57,6 +58,9 @@ class MyApp extends StatelessWidget {
               httpClient: http.Client(),
             ),
           ),
+        ),
+        Provider<UserProvider>(
+          create: (context) => UserProvider(),
         ),
         ChangeNotifierProvider<SigninProvider>(
           create: (context) => SigninProvider(

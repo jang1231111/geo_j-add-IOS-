@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:geo_j/constants/style.dart';
+import 'package:geo_j/models/user.dart';
 import 'package:geo_j/pages/signin_page.dart';
+import 'package:geo_j/providers/user/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -24,15 +27,22 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  void _signUp() {
+  void _signUp() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text;
       final email = _emailController.text;
       final phone = _phoneController.text;
 
       print('회원가입 정보: 이름: $name, 이메일: $email, 전화번호: $phone');
+
+      await context
+          .read<UserProvider>()
+          .addUser(User(name: name, email: email, phone: phone));
+
+      Navigator.pushNamed(context, SigninPage.routeName);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('회원가입 완료!')),
+        SnackBar(content: Text('전화번호로 로그인해주세요.')),
       );
     }
   }
