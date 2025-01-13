@@ -20,7 +20,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'package:location/location.dart' as loc;
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
@@ -168,7 +168,7 @@ class _ShowDevicesState extends State<ShowDevices> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await Wakelock.enable();
+      await WakelockPlus.enable();
       await enableLocationService();
       await permissionRequest();
       getCurrentLocation();
