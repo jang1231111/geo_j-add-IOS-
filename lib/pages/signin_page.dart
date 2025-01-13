@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geo_j/models/custom_error.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/pages/signup_page.dart';
+import 'package:geo_j/pages/support_page.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/providers/signin/signin_state.dart';
 import 'package:geo_j/utils/error_dialog.dart';
@@ -123,8 +124,25 @@ class _SigninPageState extends State<SigninPage> {
                           signinState.signinStatus == SigninStatus.submitting
                               ? null
                               : () {
+                                  Navigator.pushNamed( 
+                                      context, SignUpPage.routeName);
+                                },
+                      icon: Icon(Icons.person_add),
+                      label: Text('회원 가입'),
+                      style: TextButton.styleFrom(
+                          textStyle: TextStyle(
+                        fontSize: 20.0,
+                        // decoration: TextDecoration.underline,
+                      )),
+                    ),
+                    SizedBox(height: 5.0),
+                    TextButton.icon(
+                      onPressed:
+                          signinState.signinStatus == SigninStatus.submitting
+                              ? null
+                              : () {
                                   Navigator.pushNamed(
-                                      context, SignupPage.routeName);
+                                      context, SupportPage.routeName);
                                 },
                       icon: Icon(Icons.question_answer),
                       label: Text('관리자에게 문의하기'),
