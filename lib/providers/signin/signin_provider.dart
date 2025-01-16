@@ -22,12 +22,15 @@ class SigninProvider with ChangeNotifier {
   final ShipstateRepositories transportRepositories;
   final LogdataRepositories logDataRepositories;
 
-  Future<void> signin() async {
+  Future<void> signin({
+    required String phoneNumber,
+  }) async {
     _state = _state.copyWith(signinStatus: SigninStatus.submitting);
     notifyListeners();
 
     try {
-      final signinInfo = await signinRepositories.signin();
+      final signinInfo =
+          await signinRepositories.signin(phoneNumber: phoneNumber);
       _state = _state.copyWith(
           signinStatus: SigninStatus.success, signinInfo: signinInfo);
       notifyListeners();
@@ -38,40 +41,40 @@ class SigninProvider with ChangeNotifier {
     }
   }
 
-  // Future<void> updateTransportState({
-  //   required A10 a10,
-  //   required int transportState,
-  // }) async {
-  //   try {
-  //     final updated_A10 = await transportRepositories.updateTransportState(
-  //         a10: a10,
-  //         transportState: transportState,
-  //         signinInfo: _state.signinInfo);
+  Future<void> updateTransportState({
+    required A10 a10,
+    required int transportState,
+  }) async {
+    try {
+      final updated_A10 = await transportRepositories.updateTransportState(
+          a10: a10,
+          transportState: transportState,
+          signinInfo: _state.signinInfo);
 
-  //     if (updated_A10 == null) {
-  //       return;
-  //     }
+      if (updated_A10 == null) {
+        return;
+      }
 
-  //     final deviceList = _state.signinInfo.devices;
+      final deviceList = _state.signinInfo.devices;
 
-  //     for (int i = 0; i < deviceList.length; i++) {
-  //       if (deviceList[i].boxName == updated_A10.boxName) {
-  //         deviceList[i] = deviceList[i]
-  //             .copyWith(transportState: updated_A10.transportState);
-  //         break;
-  //       }
-  //     }
+      for (int i = 0; i < deviceList.length; i++) {
+        if (deviceList[i].boxName == updated_A10.boxName) {
+          deviceList[i] = deviceList[i]
+              .copyWith(transportState: updated_A10.transportState);
+          break;
+        }
+      }
 
-  //     SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
+      SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
 
-  //     _state = _state.copyWith(signinInfo: signinInfo);
-  //     notifyListeners();
-  //   } on CustomError catch (e) {
-  //     _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
-  //     notifyListeners();
-  //     rethrow;
-  //   }
-  // }
+      _state = _state.copyWith(signinInfo: signinInfo);
+      notifyListeners();
+    } on CustomError catch (e) {
+      _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
+      notifyListeners();
+      rethrow;
+    }
+  }
 
   Future<void> sendLogData({
     required String serial,
@@ -124,9 +127,9 @@ class SigninProvider with ChangeNotifier {
     for (int i = 0; i < devices.length; i++) {
       if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
           serial.toLowerCase()) {
-        final A10 updatedDevice = devices[i].copyWith(
-            temperature: temperature, battery: battery, scanned: true);
-        devices[i] = updatedDevice;
+        devices[i] =
+            devices[i].copyWith(temperature: temperature, battery: battery);
+
         _state = _state.copyWith(
             signinInfo: _state.signinInfo.copyWith(devices: devices));
 
@@ -142,23 +145,23 @@ class SigninProvider with ChangeNotifier {
     return isUpdate;
   }
 
-  // void updateBleState({
-  //   required String serial,
-  //   required String bleState,
-  // }) async {
-  //   List<A10> devices = _state.signinInfo.devices;
+  void updateBleState({
+    required String serial,
+    required String bleState,
+  }) async {
+    List<A10> devices = _state.signinInfo.devices;
 
-  //   for (int i = 0; i < devices.length; i++) {
-  //     if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
-  //         serial.toLowerCase()) {
-  //       devices[i] = devices[i].copyWith(bleState: bleState);
-  //       break;
-  //     }
-  //   }
+    for (int i = 0; i < devices.length; i++) {
+      if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+          serial.toLowerCase()) {
+        devices[i] = devices[i].copyWith(bleState: bleState);
+        break;
+      }
+    }
 
-  //   _state = _state.copyWith(
-  //       signinInfo: _state.signinInfo.copyWith(devices: devices));
+    _state = _state.copyWith(
+        signinInfo: _state.signinInfo.copyWith(devices: devices));
 
-  //   notifyListeners();
-  // }
+    notifyListeners();
+  }
 }

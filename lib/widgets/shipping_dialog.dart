@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geo_j/constants/style.dart';
-import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 
 shipFinishDialog(BuildContext context, A10 a10) {
   return showDialog(
