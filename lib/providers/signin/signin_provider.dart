@@ -1,9 +1,8 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:geo_j/models/custom_error.dart';
-import 'package:geo_j/models/log_data.dart';
-import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/models/device/device_logdata_info.dart';
+import 'package:geo_j/models/error/custom_error.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/providers/signin/signin_state.dart';
 import 'package:geo_j/repositories/log_data_repositories.dart';
 import 'package:geo_j/repositories/signin_repositories.dart';
@@ -29,45 +28,9 @@ class SigninProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final signinInfo =
-          await signinRepositories.signin(phoneNumber: phoneNumber);
+      final signinInfo = await signinRepositories.signin();
       _state = _state.copyWith(
           signinStatus: SigninStatus.success, signinInfo: signinInfo);
-      notifyListeners();
-    } on CustomError catch (e) {
-      _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
-      notifyListeners();
-      rethrow;
-    }
-  }
-
-  Future<void> updateTransportState({
-    required A10 a10,
-    required int transportState,
-  }) async {
-    try {
-      final updated_A10 = await transportRepositories.updateTransportState(
-          a10: a10,
-          transportState: transportState,
-          signinInfo: _state.signinInfo);
-
-      if (updated_A10 == null) {
-        return;
-      }
-
-      final deviceList = _state.signinInfo.devices;
-
-      for (int i = 0; i < deviceList.length; i++) {
-        if (deviceList[i].boxName == updated_A10.boxName) {
-          deviceList[i] = deviceList[i]
-              .copyWith(transportState: updated_A10.transportState);
-          break;
-        }
-      }
-
-      SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
-
-      _state = _state.copyWith(signinInfo: signinInfo);
       notifyListeners();
     } on CustomError catch (e) {
       _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
@@ -145,23 +108,23 @@ class SigninProvider with ChangeNotifier {
     return isUpdate;
   }
 
-  void updateBleState({
-    required String serial,
-    required String bleState,
-  }) async {
-    List<A10> devices = _state.signinInfo.devices;
+  // void updateBleState({
+  //   required String serial,
+  //   required String bleState,
+  // }) async {
+  //   List<A10> devices = _state.signinInfo.devices;
 
-    for (int i = 0; i < devices.length; i++) {
-      if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
-          serial.toLowerCase()) {
-        devices[i] = devices[i].copyWith(bleState: bleState);
-        break;
-      }
-    }
+  //   for (int i = 0; i < devices.length; i++) {
+  //     if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+  //         serial.toLowerCase()) {
+  //       devices[i] = devices[i].copyWith(bleState: bleState);
+  //       break;
+  //     }
+  //   }
 
-    _state = _state.copyWith(
-        signinInfo: _state.signinInfo.copyWith(devices: devices));
+  //   _state = _state.copyWith(
+  //       signinInfo: _state.signinInfo.copyWith(devices: devices));
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 }

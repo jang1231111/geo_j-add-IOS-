@@ -1,6 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:geo_j/models/log_data.dart';
+import 'package:geo_j/models/device/device_logdata_info.dart';
 
 Uint8List getMinMaxIndex(Uint8List notifyResult) {
   return notifyResult.sublist(12, 18);

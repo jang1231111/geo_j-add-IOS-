@@ -176,8 +176,8 @@ Future<void> notifyStream(
 
       /// 온도 데이터 전송
       try {
-        await deviceLogDataProvider.sendLogData(
-            serial: serial, logDatas: logDatas, devices: devices);
+        // await deviceLogDataProvider.sendLogData(
+        //     serial: serial, logDatas: logDatas, devices: devices);
 
         Navigator.pushNamed(context, DetailPage.routeName);
       } on CustomError catch (e) {

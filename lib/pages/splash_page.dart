@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:geo_j/models/custom_error.dart';
+import 'package:geo_j/models/error/custom_error.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/error_dialog.dart';
@@ -15,7 +15,7 @@ class SplashPage extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         try {
-          await context.read<SigninProvider>().signin();
+          // await context.read<SigninProvider>().signin();
           Navigator.pushNamed(context, ScanPage.routeName);
         } on CustomError catch (e) {
           errorDialog(context, e.toString());

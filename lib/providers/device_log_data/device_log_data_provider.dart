@@ -6,8 +6,8 @@ import 'package:geo_j/providers/device_log_data/device_log_data_state.dart';
 import 'package:geo_j/repositories/log_data_repositories.dart';
 
 class DeviceLogDataProvider with ChangeNotifier {
-  DeviceLogDataState _state = DeviceLogDataState.initial();
-  DeviceLogDataState get state => _state;
+  // DeviceLogDataState _state = DeviceLogDataState.initial();
+  // DeviceLogDataState get state => _state;
 
   final LogdataRepositories logDataRepositories;
 

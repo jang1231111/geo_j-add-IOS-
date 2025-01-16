@@ -1,5 +1,6 @@
-import 'package:geo_j/models/custom_error.dart';
-import 'package:geo_j/models/signin_info.dart';
+
+import 'package:geo_j/models/error/custom_error.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 
 enum SigninStatus {
   initial,

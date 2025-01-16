@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/providers/device_filter/device_filter_state.dart';
 
 class DeviceFilterProvider with ChangeNotifier {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:geo_j/models/custom_error.dart';
+import 'package:geo_j/models/error/custom_error.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/pages/signup_page.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
@@ -34,7 +34,7 @@ class _SigninPageState extends State<SigninPage> {
     form.save();
 
     try {
-      await context.read<SigninProvider>().signin();
+      // await context.read<SigninProvider>().signin();
       Navigator.pushNamed(context, ScanPage.routeName);
     } on CustomError catch (e) {
       errorDialog(context, e.toString());

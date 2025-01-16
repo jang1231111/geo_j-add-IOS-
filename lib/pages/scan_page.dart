@@ -245,7 +245,7 @@ class _ShowDevicesState extends State<ShowDevices> {
       duration,
       (_) async {
         if (scanResults != null) {
-          context.read<ScanResultProvider>().updateScanResult(scanResults!);
+          // context.read<ScanResultProvider>().updateScanResult(scanResults!);
 
           List<ScanResult> lastScanResults = [];
           lastScanResults.addAll(scanResults!);
@@ -367,7 +367,7 @@ class _DeviceItemState extends State<DeviceItem> {
   void initState() {
     super.initState();
 
-    scanResults = context.read<ScanResultProvider>().state.scanResuls;
+    // scanResults = context.read<ScanResultProvider>().state.scanResuls;
   }
 
   @override

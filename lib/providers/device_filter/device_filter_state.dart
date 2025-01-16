@@ -1,4 +1,4 @@
-import 'package:geo_j/models/signin_info.dart';
+import 'package:geo_j/models/login/signin_info.dart';
 
 class DeviceFilterState {
   final Filter filter;
