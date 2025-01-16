@@ -28,6 +28,8 @@ class ScanPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String? data = ModalRoute.of(context)!.settings.arguments as String?;
+
     return SafeArea(
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -43,7 +45,20 @@ class ScanPage extends StatelessWidget {
                   ScanHeader(),
                   SizedBox(height: 20.0),
                   SearchAndFilterDevice(),
-                  ShowDevices(),
+                  data == null
+                      ? ShowDevices()
+                      : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 50,),
+                            Text('블루투스(A10기기) 스캔 중 입니다.'),
+                            SizedBox(height: 20,),
+                            Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ],
+                        ),
                 ],
               ),
             ),

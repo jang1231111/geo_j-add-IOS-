@@ -36,26 +36,32 @@ class _SigninPageState extends State<SigninPage> {
     form.save();
 
     try {
-      await context.read<SigninProvider>().signin(phoneNumber: _phoneNumber!);
-      Navigator.pushNamed(context, ScanPage.routeName);
-    } on CustomError catch (e) {
-      // try {
-        print(e.toString());
-        final users = await context.read<UserProvider>().users;
-        final isUserExist = users.any((user) => user.phone == _phoneNumber);
+      await context.read<UserProvider>().fetchUsers();
+      final users = await context.read<UserProvider>().users;
 
-        if (isUserExist) {
-          // 내부 DB 검색 성공 시, 다음 동작 수행
-          Navigator.pushNamed(context, ScanPage.routeName);
-        } else {
-          // 사용자 정보가 없는 경우 CustomError 발생
-          throw CustomError(errMsg: '내부 DB에서도 사용자를 찾을 수 없습니다.');
-        }
-      // } on CustomError catch (dbError) {
-      //   errorDialog(context, '사용자를 찾을 수 없습니다.');
-      //   print('dbError : ${dbError.toString()}');
-      //   // 내부 DB 검색 중 오류가 발생한 경우
-      // }
+      final phoneNumber = _phoneNumber!.replaceAll('-', '');
+      final isUserExist = users.any((user) {
+        print('user: ${user.phone}  , phone : ${phoneNumber}');
+        return user.phone == phoneNumber;
+      });
+
+      print('isUserExist : ${isUserExist}');
+
+      if (isUserExist) {
+        // 내부 DB 검색 성공 시, 다음 동작 수행
+        Navigator.pushNamed(context, ScanPage.routeName, arguments: '내부DB');
+      } else {
+        // 사용자 정보가 없는 경우 CustomError 발생
+        throw CustomError(errMsg: '전화번호를 확인해주세요.');
+      }
+    } on CustomError catch (e) {
+      try {
+        print(e.toString());
+        await context.read<SigninProvider>().signin(phoneNumber: _phoneNumber!);
+        Navigator.pushNamed(context, ScanPage.routeName);
+      } on CustomError catch (error) {
+        errorDialog(context, error.toString());
+      }
     }
   }
 

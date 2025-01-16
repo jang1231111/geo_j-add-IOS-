@@ -9,6 +9,7 @@ class UserProvider {
 
   Future<void> fetchUsers() async {
     _users = await repository.getAllUsers();
+    print(users.toString());
   }
 
   Future<void> addUser(User user) async {

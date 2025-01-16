@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 class User {
   final int? id;
   final String name;
@@ -22,5 +23,10 @@ class User {
       email: map['email'],
       phone: map['phone'],
     );
+  }
+
+  @override
+  String toString() {
+    return 'User(id: $id, name: $name, email: $email, phone: $phone)';
   }
 }
