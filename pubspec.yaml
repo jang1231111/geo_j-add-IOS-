@@ -38,8 +38,7 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_blue_plus: ^1.32.8
   location: ^7.0.0
-  wakelock: ^0.6.2
-  fl_pip: ^2.0.0
+  wakelock_plus: ^1.2.10
   syncfusion_flutter_charts: ^26.2.10
 
   # The following adds the Cupertino Icons font to your application.

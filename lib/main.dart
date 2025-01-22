@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:geo_j/pages/detail_page.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/pages/splash_page.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
@@ -75,8 +76,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider3<SigninProvider, DeviceFilterProvider,
             DeviceSearchProvider, FilteredDevicesProvider>(
           create: (_) => FilteredDevicesProvider(
-            deviceFilterProvider: context.read<DeviceFilterProvider>(),
             deviceSearchProvider: context.read<DeviceSearchProvider>(),
+            deviceFilterProvider: context.read<DeviceFilterProvider>(),
             signinProvider: context.read<SigninProvider>(),
           ),
           update: (
@@ -95,9 +96,11 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'GEO_J',
         debugShowCheckedModeBanner: false,
-        home: SplashPage(),
+        // home: SplashPage(),
         routes: {
+          '/': (context) => SplashPage(),
           ScanPage.routeName: (context) => ScanPage(),
+          DetailPage.routeName: (context) => DetailPage(),
         },
       ),
     );
