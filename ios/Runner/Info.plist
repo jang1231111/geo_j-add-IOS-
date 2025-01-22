@@ -37,19 +37,19 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>현재 위치 정보를 얻기 위해 위치 접근 권한 동의가 필요합니다. 설정에서 이를 변경할 수 있습니다.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>사용자의 위치 정보 데이터를 웹페이지(http://geo.logithermo.com)에서 표시하기 위해, 위치 접근권한 동의가 필요합니다. 설정에서 이를 변경할 수 있습니다.</string>
+	<string>사용자의 위치 정보 데이터를 표시하기 위해, 위치 접근권한 동의가 필요합니다. 설정에서 이를 변경할 수 있습니다.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>motion</string>
 	<key>NSSiriUsageDescription</key>
 	<string>My description about why I need this capability</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
+	<!-- <key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 		<string>bluetooth-central</string>
 		<string>location</string>
-	</array>
+	</array> -->
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

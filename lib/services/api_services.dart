@@ -40,7 +40,8 @@ class ApiServices {
         throw Exception('전화번호를 확인해 주세요');
       }
 
-      // print(responseBody.toString());
+      // print('getCenterInfo ${uri}');
+      // print('getCenterInfo ${responseBody.toString()}');
       final centerInfo = Centerinfo.fromJson(responseBody);
 
       return centerInfo;
@@ -61,7 +62,7 @@ class ApiServices {
     var client = http.Client();
     var uri = Uri.parse(centerInfo.getDeviceListUri);
 
-    // print(uri);
+    print(uri);
 
     try {
       final http.Response response = await client.post(uri,
@@ -72,7 +73,7 @@ class ApiServices {
         throw Exception(httpErrorHandler(response));
       }
 
-      // print(response.body.toString());
+      print(response.body.toString());
       final List<dynamic> responseBody = json.decode(response.body);
 
       if (responseBody.isEmpty) {

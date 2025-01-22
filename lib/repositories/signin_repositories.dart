@@ -15,11 +15,11 @@ class SigninRepositories {
 
       final List<A10> deviceList = await apiServices.getDeviceList(centerinfo);
 
-      // for (int i = 0; i < deviceList.length; i++) {
-      //   print('**********************');
-      //   print('Device : ${deviceList[i]}');
-      //   print('**********************');
-      // }
+      for (int i = 0; i < deviceList.length; i++) {
+        print('**********************');
+        print('Device : ${deviceList[i]}');
+        print('**********************');
+      }
 
       SigninInfo signinInfo =
           SigninInfo(centerInfo: centerinfo, devices: deviceList);
