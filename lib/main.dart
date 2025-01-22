@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
+  // FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   runApp(const MyApp());
 }
 
@@ -76,9 +76,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider3<SigninProvider, DeviceFilterProvider,
             DeviceSearchProvider, FilteredDevicesProvider>(
           create: (_) => FilteredDevicesProvider(
-            deviceSearchProvider: context.read<DeviceSearchProvider>(),
-            deviceFilterProvider: context.read<DeviceFilterProvider>(),
-            signinProvider: context.read<SigninProvider>(),
+            deviceSearchProvider: DeviceSearchProvider(),
+            deviceFilterProvider: DeviceFilterProvider(),
+            signinProvider: SigninProvider(
+              signinRepositories: SigninRepositories(
+                  apiServices: ApiServices(httpClient: http.Client())),
+              transportRepositories: ShipstateRepositories(
+                  apiServices: ApiServices(httpClient: http.Client())),
+              logDataRepositories: LogdataRepositories(
+                  apiServices: ApiServices(httpClient: http.Client())),
+            ),
           ),
           update: (
             BuildContext context,
@@ -88,15 +95,15 @@ class MyApp extends StatelessWidget {
             FilteredDevicesProvider? _,
           ) =>
               FilteredDevicesProvider(
-                  deviceFilterProvider: deviceFilterProvider,
-                  deviceSearchProvider: deviceSearchProvider,
-                  signinProvider: signinProvider),
-        )
+            deviceFilterProvider: deviceFilterProvider,
+            deviceSearchProvider: deviceSearchProvider,
+            signinProvider: signinProvider,
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'GEO_J',
         debugShowCheckedModeBanner: false,
-        // home: SplashPage(),
         routes: {
           '/': (context) => SplashPage(),
           ScanPage.routeName: (context) => ScanPage(),

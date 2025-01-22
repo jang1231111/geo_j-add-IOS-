@@ -21,9 +21,7 @@ class SigninProvider with ChangeNotifier {
   final ShipstateRepositories transportRepositories;
   final LogdataRepositories logDataRepositories;
 
-  Future<void> signin({
-    required String phoneNumber,
-  }) async {
+  Future<void> signin() async {
     _state = _state.copyWith(signinStatus: SigninStatus.submitting);
     notifyListeners();
 
@@ -90,8 +88,8 @@ class SigninProvider with ChangeNotifier {
     for (int i = 0; i < devices.length; i++) {
       if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
           serial.toLowerCase()) {
-        devices[i] =
-            devices[i].copyWith(temperature: temperature, battery: battery);
+        devices[i] = devices[i].copyWith(
+            temperature: temperature, battery: battery, scanned: true);
 
         _state = _state.copyWith(
             signinInfo: _state.signinInfo.copyWith(devices: devices));

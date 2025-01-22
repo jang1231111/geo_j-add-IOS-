@@ -15,7 +15,7 @@ class SplashPage extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         try {
-          // await context.read<SigninProvider>().signin();
+          await context.read<SigninProvider>().signin();
           Navigator.pushNamed(context, ScanPage.routeName);
         } on CustomError catch (e) {
           errorDialog(context, e.toString());
