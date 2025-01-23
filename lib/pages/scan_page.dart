@@ -7,11 +7,13 @@ import 'package:geo_j/pages/signin_page.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
-import 'package:geo_j/providers/scan_result/scan_result_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/repositories/gps_data_repositories.dart';
 import 'package:geo_j/utils/debounce.dart';
 import 'package:geo_j/utils/bluetooth.dart';
+import 'package:geo_j/widgets/dialog.dart';
+import 'package:geo_j/widgets/dialog2.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
@@ -245,13 +247,10 @@ class _ShowDevicesState extends State<ShowDevices> {
       duration,
       (_) async {
         if (scanResults != null) {
-          // context.read<ScanResultProvider>().updateScanResult(scanResults!);
 
-          List<ScanResult> lastScanResults = [];
-          lastScanResults.addAll(scanResults!);
 
-          for (int i = 0; i < lastScanResults.length; i++) {
-            ScanResult scanResult = lastScanResults[i];
+          for (int i = 0; i < scanResults!.length; i++) {
+            ScanResult scanResult = scanResults![i];
             Uint8List advertiseData = Uint8List.fromList(
                 scanResult.advertisementData.manufacturerData.values.first);
 
@@ -345,15 +344,15 @@ class _ShowDevicesState extends State<ShowDevices> {
         );
       },
       itemBuilder: (BuildContext context, int index) {
-        return DeviceItem(device: filteredDevices[index]);
+        return DeviceItem(deNumber: filteredDevices[index].deNumber);
       },
     );
   }
 }
 
 class DeviceItem extends StatefulWidget {
-  final A10 device;
-  const DeviceItem({super.key, required this.device});
+  final String deNumber;
+  const DeviceItem({super.key, required this.deNumber});
 
   @override
   State<DeviceItem> createState() => _DeviceItemState();
@@ -372,6 +371,14 @@ class _DeviceItemState extends State<DeviceItem> {
 
   @override
   Widget build(BuildContext context) {
+    final device = context
+        .watch<FilteredDevicesProvider>()
+        .state
+        .filteredDevices
+        .firstWhere(
+          (d) => d.deNumber == widget.deNumber,
+        );
+
     return Container(
       decoration:
           BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
@@ -415,11 +422,11 @@ class _DeviceItemState extends State<DeviceItem> {
                             //MAC어드레스 번호
                             onTap: () async {},
                             child: Text(
-                              widget.device.deNumber,
+                              device.deNumber,
                               style: macName(context),
                             ),
                           ),
-                          getbatteryImage(context, widget.device.battery),
+                          getbatteryImage(context, device.battery),
                         ],
                       )),
                 ),
@@ -429,32 +436,27 @@ class _DeviceItemState extends State<DeviceItem> {
                       padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                       width: MediaQuery.of(context).size.width * 1,
                       child: Row(
-                        // mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            //시작시간,
                             flex: 1,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                //시작시간:
-
                                 Text('시작시간',
                                     style: startText(context),
                                     textAlign: TextAlign.start),
-                                // device.arrivalTime != null
-                                //     ? Text(
-                                //         DateFormat('yyyy-MM-dd HH:mm')
-                                //             .format(device.arrivalTime),
-                                //         style: startTime(context),
-                                //       )
-                                //     :
-                                Text(
-                                  '시작 버튼을 눌러주세요.',
-                                  style: startTime(context),
-                                ),
+                                device.startTime != null
+                                    ? Text(
+                                        DateFormat('yyyy-MM-dd HH:mm')
+                                            .format(device.startTime!),
+                                        style: startTime(context),
+                                      )
+                                    : Text(
+                                        '시작 버튼을 눌러주세요.',
+                                        style: startTime(context),
+                                      ),
                               ],
                             ),
                           ),
@@ -476,7 +478,7 @@ class _DeviceItemState extends State<DeviceItem> {
                                 Container(
                                   padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                                   child: Text(
-                                    '${widget.device.temperature}°C',
+                                    '${device.temperature}°C',
                                     style: temp(context),
                                   ),
                                 )
@@ -501,16 +503,18 @@ class _DeviceItemState extends State<DeviceItem> {
                                     color: Color.fromRGBO(222, 222, 222, 1),
                                     width: 0.7))),
                         child: TextButton(
-                          onPressed: () {
+                          onPressed: () async {
                             // 확인용 Dialog
-                            // int result ƒ= await EndYesOrNoDialog(context);
-                            // if (result == 1) {
-                            context
-                                .read<FilteredDevicesProvider>()
-                                .updateStartTime(widget.device);
-                            // }ƒ
+                            bool result = await startTimeDialog(context);
+                            if (result) {
+                              context
+                                  .read<SigninProvider>()
+                                  .updateStartTime(device);
+                              print(
+                                  '시작 시간 변경 테스트 로그 \n ${device} ');
+                            }
                           },
-                          child: widget.device.startTime != null
+                          child: device.arrivalTime != null
                               ? Text('온도 수집 중', style: startButton2(context))
                               : Text('시 작', style: startButton(context)),
                         ),
@@ -519,107 +523,101 @@ class _DeviceItemState extends State<DeviceItem> {
                     Expanded(
                         flex: 1,
                         child: Container(
-                          // width:MediaQuery.of(context).size.width*0.5,
                           decoration: BoxDecoration(
                             color: Color.fromRGBO(240, 240, 240, 1),
-                            // border: Border(top: BorderSide(
-                            //     color: Color.fromRGBO(222,222,222, 1),
-                            //     width:0.7),right: BorderSide(color:Color.fromRGBO(222,222,222, 1),width: 0.7))
                           ),
-
                           child: TextButton(
                               onPressed: () async {
-                                // widget.device.startTime == null
-                                //     ? () {
-                                //         // Err Dialog
-                                //         // showMyDialog_ShipFinish_Error(context2);
-                                //       }
-                                //     : () async {
-                                if (!connecting) {
-                                  StreamSubscription<BluetoothConnectionState>?
-                                      subscription;
-                                  try {
-                                    ScanResult scanResult;
-
-                                    for (var i = 0;
-                                        i < scanResults.length;
-                                        i++) {
-                                      Uint8List advertiseData =
-                                          Uint8List.fromList(scanResults[i]
-                                              .advertisementData
-                                              .manufacturerData
-                                              .values
-                                              .first);
-
-                                      /// Serial 6 자리  ex)1903CE
-                                      String serial1 = advertiseData[5]
-                                          .toRadixString(16)
-                                          .padLeft(2, '0');
-                                      String serial2 = advertiseData[6]
-                                          .toRadixString(16)
-                                          .padLeft(2, '0');
-                                      String serial3 = advertiseData[7]
-                                          .toRadixString(16)
-                                          .padLeft(2, '0');
-                                      String serial =
-                                          serial1 + serial2 + serial3;
-
-                                      if (widget.device.deNumber == serial) {
-                                        scanResult = scanResults[i];
-
-                                        /// 데이터 연결 루틴 시작
-                                        subscription = bleStateListener(
-                                            context, scanResult, serial);
-
-                                        /// 미연결 상태일 경우에만 연결 시도
-                                        if (scanResult.device.isDisconnected) {
-                                          await scanResult.device.connect(
-                                              timeout: Duration(seconds: 8));
-                                          connecting = true;
-                                        }
-
-                                        /// 연결중일 경우, 연결만 해제
-                                        /// 재연결 안하는 이유: 블루투스 오류 방지를 위해, 한 주기(UpdateTimer : 10초) 쉬고 다음번 루틴 때 연결 처리
-                                        else {
-                                          await scanResult.device.disconnect();
-                                          subscription.cancel();
-                                        }
+                                device.startTime == null
+                                    ? () {
+                                        // Err Dialog
+                                        showMyDialog_ShipFinish_Error(context);
                                       }
-                                    }
-                                  } catch (e) {
-                                    print(
-                                        '기기 연결 BleException : ${e.toString()}  시간 : ${DateTime.now()}');
-                                    subscription!.cancel();
-                                  }
+                                    : () async {
+                                        if (!connecting) {
+                                          StreamSubscription<
+                                                  BluetoothConnectionState>?
+                                              subscription;
+                                          try {
+                                            ScanResult scanResult;
 
-                                  //////////
+                                            for (var i = 0;
+                                                i < scanResults.length;
+                                                i++) {
+                                              Uint8List advertiseData =
+                                                  Uint8List.fromList(
+                                                      scanResults[i]
+                                                          .advertisementData
+                                                          .manufacturerData
+                                                          .values
+                                                          .first);
 
-                                  // duration = 1;
-                                  // connecting = true;
-                                  // await connect(index, 0, 2);
-                                  // endTime = new DateTime.now()
-                                  //     .millisecondsSinceEpoch;
-                                  // deferenceMillSeconds = endTime -
-                                  //     deviceList[index].startTime;
-                                }
-                                // };
+                                              /// Serial 6 자리  ex)1903CE
+                                              String serial1 = advertiseData[5]
+                                                  .toRadixString(16)
+                                                  .padLeft(2, '0');
+                                              String serial2 = advertiseData[6]
+                                                  .toRadixString(16)
+                                                  .padLeft(2, '0');
+                                              String serial3 = advertiseData[7]
+                                                  .toRadixString(16)
+                                                  .padLeft(2, '0');
+                                              String serial =
+                                                  serial1 + serial2 + serial3;
+
+                                              if (device.deNumber == serial) {
+                                                scanResult = scanResults[i];
+
+                                                /// 데이터 연결 루틴 시작
+                                                subscription = bleStateListener(
+                                                    context,
+                                                    scanResult,
+                                                    serial);
+
+                                                /// 미연결 상태일 경우에만 연결 시도
+                                                if (scanResult
+                                                    .device.isDisconnected) {
+                                                  await scanResult.device
+                                                      .connect(
+                                                          timeout: Duration(
+                                                              seconds: 8));
+                                                  connecting = true;
+                                                }
+
+                                                /// 연결중일 경우, 연결만 해제
+                                                /// 재연결 안하는 이유: 블루투스 오류 방지를 위해, 한 주기(UpdateTimer : 10초) 쉬고 다음번 루틴 때 연결 처리
+                                                else {
+                                                  await scanResult.device
+                                                      .disconnect();
+                                                  subscription.cancel();
+                                                }
+                                              }
+                                            }
+                                          } catch (e) {
+                                            print(
+                                                '기기 연결 BleException : ${e.toString()}  시간 : ${DateTime.now()}');
+                                            subscription!.cancel();
+                                          }
+
+                                          //////////
+
+                                          // duration = 1;
+                                          // connecting = true;
+                                          // await connect(index, 0, 2);
+                                          // endTime = new DateTime.now()
+                                          //     .millisecondsSinceEpoch;
+                                          // deferenceMillSeconds = endTime -
+                                          //     deviceList[index].startTime;
+                                        }
+                                      };
                               },
                               child: Text(
-                                '일부  전송:',
-                                style: startButton(context),
-                              )
-                              // deviceList[index].startTime == null
-                              //     ? Text(
-                              //         '일부  전송:' +
-                              //             deviceList[index].sendcount.toString(),
-                              //         style: endButton2(context),
-                              //       )
-                              //     : Text(
-                              //         '일부  전송:' +
-                              //             deviceList[index].sendcount.toString(),
-                              //         style: startButton(context),
-                              // ),
-                              ),
+                                // '일부 전송: ${widget.device[index].sendcount}',
+                                '일부 전송: 여기 카운트값으로 수정 필요',
+                                style: device.startTime == null
+                                    ? endButton2(context)
+                                    : startButton(context),
+                              )),
                         )),
                     Expanded(
                         flex: 1,

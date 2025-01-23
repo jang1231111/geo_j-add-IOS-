@@ -28,6 +28,7 @@ class SigninInfo {
 
 class A10 {
   final DateTime? startTime;
+  final DateTime? arrivalTime;
   final String boxName;
   final String deNumber;
   final String deLocation;
@@ -43,6 +44,7 @@ class A10 {
     required this.deLocation,
     required this.datetime,
     this.startTime,
+    this.arrivalTime,
     this.temperature = -99,
     this.battery = -999,
     this.scanned = false,
@@ -59,6 +61,7 @@ class A10 {
 
   A10 copyWith({
     DateTime? startTime,
+    DateTime? arrivalTime,
     String? boxName,
     String? deNumber,
     String? deLocation,
@@ -69,6 +72,7 @@ class A10 {
   }) {
     return A10(
       startTime: startTime ?? this.startTime,
+      arrivalTime: arrivalTime ?? this.arrivalTime,
       boxName: boxName ?? this.boxName,
       deNumber: deNumber ?? this.deNumber,
       deLocation: deLocation ?? this.deLocation,
@@ -81,6 +85,6 @@ class A10 {
 
   @override
   String toString() {
-    return 'A10(startTime: $startTime, boxName: $boxName, deNumber: $deNumber, deLocation: $deLocation, datetime: $datetime, temperature: $temperature, battery: $battery, scanned: $scanned)';
+    return 'A10(startTime: $startTime, arrivalTime: $arrivalTime, boxName: $boxName, deNumber: $deNumber, deLocation: $deLocation, datetime: $datetime, temperature: $temperature, battery: $battery, scanned: $scanned)';
   }
 }

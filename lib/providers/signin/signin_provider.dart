@@ -85,25 +85,48 @@ class SigninProvider with ChangeNotifier {
     /// Battery
     int battery = advertiseData[14];
 
-    for (int i = 0; i < devices.length; i++) {
-      if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+    /// Adevertise Update
+    final newDeviceList = devices.map((device) {
+      if (device.deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
           serial.toLowerCase()) {
-        devices[i] = devices[i].copyWith(
-            temperature: temperature, battery: battery, scanned: true);
-
-        _state = _state.copyWith(
-            signinInfo: _state.signinInfo.copyWith(devices: devices));
-
-        notifyListeners();
+        final updatedDevice = device.copyWith(
+          temperature: temperature,
+          battery: battery,
+          scanned: true,
+        );
 
         // 데이터 전송 시간 체크
-        if (devices[i].datetime.isBefore(
+        if (device.datetime.isBefore(
             DateTime.now().toLocal().subtract(Duration(minutes: 10)))) {
           isUpdate = true;
         }
+
+        return updatedDevice;
       }
-    }
+
+      return device;
+    }).toList();
+
+    _state = _state.copyWith(
+        signinInfo: _state.signinInfo.copyWith(devices: newDeviceList));
+
+    notifyListeners();
+
     return isUpdate;
+  }
+
+  void updateStartTime(A10 device) {
+    final deviceList = _state.signinInfo.devices;
+    final updatedDevice = device.copyWith(startTime: DateTime.now());
+
+    final newDeviceList = deviceList.map((d) {
+      return d.deNumber == device.deNumber ? updatedDevice : d;
+    }).toList();
+
+    _state = _state.copyWith(
+        signinInfo: _state.signinInfo.copyWith(devices: newDeviceList));
+
+    notifyListeners();
   }
 
   // void updateBleState({

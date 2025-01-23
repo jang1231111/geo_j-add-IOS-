@@ -10,57 +10,18 @@ class FilteredDevicesProvider extends ChangeNotifier {
   final DeviceSearchProvider deviceSearchProvider;
   final SigninProvider signinProvider;
 
-  FilteredDevicesProvider(
-      {required this.deviceFilterProvider,
-      required this.deviceSearchProvider,
-      required this.signinProvider});
+  List<A10> _filteredDevices = [];
 
-  FilteredDevicesState get state {
-    List<A10> _filteredDevices;
-    List<A10> _devices = signinProvider.state.signinInfo.devices;
-
-    // switch (deviceFilterProvider.state.filter) {
-    //   case Filter.active:
-    //     _filteredDevices = _devices.where((A10 device) {
-    //       return device.transportState != 1;
-    //     }).toList();
-    //     break;
-    //   case Filter.completed:
-    //     _filteredDevices = _devices.where((A10 device) {
-    //       return device.transportState == 1;
-    //     }).toList();
-    //     break;
-    //   case Filter.all:
-    //     _filteredDevices = _devices;
-    //     break;
-    // }
-
-    _filteredDevices = _devices.where((A10 device) {
-      return device.scanned;
-    }).toList();
-
-    if (deviceSearchProvider.state.searchTerm.isNotEmpty) {
-      _filteredDevices = _filteredDevices
-          .where((A10 device) => device.boxName
-              .toLowerCase()
-              .contains(deviceSearchProvider.state.searchTerm))
-          .toList();
-    }
-
-    // print('_filteredDevices $_filteredDevices');
-
-    return FilteredDevicesState(filteredDevices: _filteredDevices);
+  FilteredDevicesProvider({
+    required this.deviceFilterProvider,
+    required this.deviceSearchProvider,
+    required this.signinProvider,
+  }) {
+    _filteredDevices = signinProvider.state.signinInfo.devices
+        .where((device) => device.scanned)
+        .toList();
   }
 
-  void updateStartTime(A10 device) {
-    final updateDevice = device.copyWith(startTime: new DateTime.now());
-
-    final devices = state.filteredDevices;
-    for (var i = 0; i < devices.length; i++) {
-      if (devices[i].deNumber == device.deNumber) {
-        devices[i] = updateDevice;
-      }
-    }
-    notifyListeners();
-  }
+  FilteredDevicesState get state =>
+      FilteredDevicesState(filteredDevices: _filteredDevices);
 }
