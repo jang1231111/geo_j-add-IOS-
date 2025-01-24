@@ -6,8 +6,8 @@ import 'package:geo_j/providers/device_log_data/device_log_data_state.dart';
 import 'package:geo_j/repositories/log_data_repositories.dart';
 
 class DeviceLogDataProvider with ChangeNotifier {
-  // DeviceLogDataState _state = DeviceLogDataState.initial();
-  // DeviceLogDataState get state => _state;
+  DeviceLogDataState _state = DeviceLogDataState.initial();
+  DeviceLogDataState get state => _state;
 
   final LogdataRepositories logDataRepositories;
 
@@ -15,36 +15,22 @@ class DeviceLogDataProvider with ChangeNotifier {
     required this.logDataRepositories,
   });
 
-  // Future<void> sendLogData({
-  //   required String serial,
-  //   required List<LogData> logDatas,
-  //   required List<A10> devices,
-  // }) async {
-  //   try {
-  //     final updated_A10 = await logDataRepositories.sendLogData(
-  //         serial: serial, devices: devices, logDatas: logDatas);
+  Future<void> sendLogData({
+    required String serial,
+    required List<LogData> logDatas,
+    required List<A10> devices,
+  }) async {
+    try {
+      await logDataRepositories.sendLogData(
+          serial: serial, devices: devices, logDatas: logDatas);
 
-  //     if (updated_A10 == null) {
-  //       return;
-  //     }
-
-  //     for (int i = 0; i < devices.length; i++) {
-  //       if (devices[i].deNumber == updated_A10.deNumber) {
-  //         devices[i] = devices[i].copyWith(datetime: updated_A10.datetime);
-  //       }
-  //     }
-
-  //     DeviceLogDataInfo deviceLogDataInfo =
-  //         _state.deviceLogDataInfo.copyWith(logdatas: logDatas);
-
-  //     _state = _state.copyWith(
-  //         centerDataInfo: deviceLogDataInfo,
-  //         status: DeviceLogDataStatus.success);
-  //     notifyListeners();
-  //   } on CustomError catch (e) {
-  //     _state = _state.copyWith(status: DeviceLogDataStatus.error, error: e);
-  //     notifyListeners();
-  //     rethrow;
-  //   }
-  // }
+      _state = _state.copyWith(
+          logDatas: logDatas, status: DeviceLogDataStatus.success);
+      notifyListeners();
+    } on CustomError catch (e) {
+      _state = _state.copyWith(status: DeviceLogDataStatus.error, error: e);
+      notifyListeners();
+      rethrow;
+    }
+  }
 }

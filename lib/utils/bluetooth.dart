@@ -5,6 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/models/error/custom_error.dart';
 import 'package:geo_j/models/device/device_logdata_info.dart';
 import 'package:geo_j/pages/detail_page.dart';
+import 'package:geo_j/providers/connecting_provider/connecting_provider.dart';
 import 'package:geo_j/providers/device_log_data/device_log_data_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/convert.dart';
@@ -164,8 +165,7 @@ Future<void> notifyStream(
     if (notifyResult[10] == 0x06) {
       DeviceLogDataProvider deviceLogDataProvider =
           context.read<DeviceLogDataProvider>();
-      SigninProvider signinProvider = context.read<SigninProvider>();
-      final devices = signinProvider.state.signinInfo.devices;
+      final devices = context.read<SigninProvider>().state.signinInfo.devices;
 
       /// Serial
       List<int> serials = notifyResult.sublist(4, 7).reversed.toList();
@@ -176,9 +176,10 @@ Future<void> notifyStream(
 
       /// 온도 데이터 전송
       try {
-        // await deviceLogDataProvider.sendLogData(
-        //     serial: serial, logDatas: logDatas, devices: devices);
-
+        await deviceLogDataProvider.sendLogData(
+            serial: serial, logDatas: logDatas, devices: devices);
+            
+        context.read<ConnectingProvider>().disConnect();
         Navigator.pushNamed(context, DetailPage.routeName);
       } on CustomError catch (e) {
         print('데이터 전송 실패 : ${e.toString()}');
@@ -187,10 +188,11 @@ Future<void> notifyStream(
         // context
         //     .read<SigninProvider>()
         //     .updateBleState(serial: serial, bleState: '데이터 전송 실패');
+      } finally {
+        /// 연결 종료
+        await device.disconnect();
+        context.read<ConnectingProvider>().disConnect();
       }
-
-      /// 연결 종료
-      await device.disconnect();
     }
   });
 

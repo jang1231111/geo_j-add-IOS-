@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:geo_j/models/device/device_logdata_info.dart';
 import 'package:geo_j/models/error/custom_error.dart';
 import 'package:geo_j/models/login/signin_info.dart';
@@ -10,19 +11,15 @@ class LogdataRepositories {
 
   Future<A10?> sendLogData({
     required String serial,
-    required SigninInfo signinInfo,
+    required List<A10> devices ,
     required List<LogData> logDatas,
   }) async {
     /// 전송 기기
-    List<A10> devices = signinInfo.devices;
-    A10? a10;
-    for (int i = 0; i < devices.length; i++) {
-      if (devices[i].deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
-          serial.toLowerCase()) {
-        a10 = devices[i];
-        break;
-      }
-    }
+    A10? a10 = devices.firstWhereOrNull(
+      (device) =>
+          device.deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+          serial.toLowerCase(),
+    );
 
     /// 목록에 기기 없는 경우
     if (a10 == null) {
@@ -31,7 +28,7 @@ class LogdataRepositories {
 
     /// 데이터 전송
     try {
-      // await apiServices.sendLogData(          a10, logDatas, signinInfo.centerInfo.sendLogDataUri);
+      await apiServices.dsitSendLogData(a10, logDatas);
       final List<A10> newDevices = await apiServices.getDeviceList();
 
       for (int i = 0; i < newDevices.length; i++) {

@@ -29,6 +29,7 @@ class SigninInfo {
 class A10 {
   final DateTime? startTime;
   final DateTime? arrivalTime;
+  final int? sendCount;
   final String boxName;
   final String deNumber;
   final String deLocation;
@@ -48,6 +49,7 @@ class A10 {
     this.temperature = -99,
     this.battery = -999,
     this.scanned = false,
+    this.sendCount = 0,
   });
 
   factory A10.fromJson(Map<String, dynamic> json) {
@@ -62,6 +64,7 @@ class A10 {
   A10 copyWith({
     DateTime? startTime,
     DateTime? arrivalTime,
+    int? sendCount,
     String? boxName,
     String? deNumber,
     String? deLocation,
@@ -73,6 +76,7 @@ class A10 {
     return A10(
       startTime: startTime ?? this.startTime,
       arrivalTime: arrivalTime ?? this.arrivalTime,
+      sendCount: sendCount ?? this.sendCount,
       boxName: boxName ?? this.boxName,
       deNumber: deNumber ?? this.deNumber,
       deLocation: deLocation ?? this.deLocation,
@@ -85,6 +89,6 @@ class A10 {
 
   @override
   String toString() {
-    return 'A10(startTime: $startTime, arrivalTime: $arrivalTime, boxName: $boxName, deNumber: $deNumber, deLocation: $deLocation, datetime: $datetime, temperature: $temperature, battery: $battery, scanned: $scanned)';
+    return 'A10(startTime: $startTime, arrivalTime: $arrivalTime, sendCount: $sendCount, boxName: $boxName, deNumber: $deNumber, deLocation: $deLocation, datetime: $datetime, temperature: $temperature, battery: $battery, scanned: $scanned)';
   }
 }

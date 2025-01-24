@@ -3,9 +3,12 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/pages/detail_page.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/pages/splash_page.dart';
+import 'package:geo_j/providers/connecting_provider/connecting_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
+import 'package:geo_j/providers/device_log_data/device_log_data_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
+import 'package:geo_j/providers/scan_result/scan_result_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/repositories/gps_data_repositories.dart';
 import 'package:geo_j/repositories/log_data_repositories.dart';
@@ -67,6 +70,20 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<DeviceSearchProvider>(
           create: (context) => DeviceSearchProvider(),
+        ),
+        ChangeNotifierProvider<DeviceSearchProvider>(
+          create: (context) => DeviceSearchProvider(),
+        ),
+        ChangeNotifierProvider<DeviceLogDataProvider>(
+          create: (context) => DeviceLogDataProvider(
+              logDataRepositories: LogdataRepositories(
+                  apiServices: ApiServices(httpClient: http.Client()))),
+        ),
+        ChangeNotifierProvider<ScanResultProvider>(
+          create: (context) => ScanResultProvider(),
+        ),
+        ChangeNotifierProvider<ConnectingProvider>(
+          create: (context) => ConnectingProvider(),
         ),
         // ProxyProvider<SigninProvider, ActiveShippingCountProvider>(
         //   update: (BuildContext context, SigninProvider signinProvider,

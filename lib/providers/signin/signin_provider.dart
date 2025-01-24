@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:geo_j/models/device/device_logdata_info.dart';
 import 'package:geo_j/models/error/custom_error.dart';
 import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/providers/signin/signin_state.dart';
@@ -29,38 +28,6 @@ class SigninProvider with ChangeNotifier {
       final signinInfo = await signinRepositories.signin();
       _state = _state.copyWith(
           signinStatus: SigninStatus.success, signinInfo: signinInfo);
-      notifyListeners();
-    } on CustomError catch (e) {
-      _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
-      notifyListeners();
-      rethrow;
-    }
-  }
-
-  Future<void> sendLogData({
-    required String serial,
-    required List<LogData> logDatas,
-  }) async {
-    try {
-      final updated_A10 = await logDataRepositories.sendLogData(
-          serial: serial, signinInfo: _state.signinInfo, logDatas: logDatas);
-
-      if (updated_A10 == null) {
-        return;
-      }
-
-      final deviceList = _state.signinInfo.devices;
-
-      for (int i = 0; i < deviceList.length; i++) {
-        if (deviceList[i].deNumber == updated_A10.deNumber) {
-          deviceList[i] =
-              deviceList[i].copyWith(datetime: updated_A10.datetime);
-        }
-      }
-
-      SigninInfo signinInfo = _state.signinInfo.copyWith(devices: deviceList);
-
-      _state = _state.copyWith(signinInfo: signinInfo);
       notifyListeners();
     } on CustomError catch (e) {
       _state = _state.copyWith(signinStatus: SigninStatus.error, error: e);
@@ -118,6 +85,20 @@ class SigninProvider with ChangeNotifier {
   void updateStartTime(A10 device) {
     final deviceList = _state.signinInfo.devices;
     final updatedDevice = device.copyWith(startTime: DateTime.now());
+
+    final newDeviceList = deviceList.map((d) {
+      return d.deNumber == device.deNumber ? updatedDevice : d;
+    }).toList();
+
+    _state = _state.copyWith(
+        signinInfo: _state.signinInfo.copyWith(devices: newDeviceList));
+
+    notifyListeners();
+  }
+
+  void updateSendCount(A10 device) {
+    final deviceList = _state.signinInfo.devices;
+    final updatedDevice = device.copyWith(sendCount: device.sendCount! + 1);
 
     final newDeviceList = deviceList.map((d) {
       return d.deNumber == device.deNumber ? updatedDevice : d;

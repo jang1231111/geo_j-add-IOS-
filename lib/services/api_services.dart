@@ -41,7 +41,7 @@ class ApiServices {
   }
 
   Future<void> dsitSendLogData(
-      A10 a10, List<LogData> logDatas, String url) async {
+      A10 a10, List<LogData> logDatas) async {
     String body = '';
     for (int i = 0; i < logDatas.length; i++) {
       body += '0' +
@@ -71,9 +71,8 @@ class ApiServices {
     }
 
     var client = http.Client();
-    var uristring = "http://gep.thermocert.net:19987";
-    var uri = Uri.parse(uristring);
-    print(uristring.toString());
+    var uri = Uri.parse(kSendDataUri);
+    print(kSendDataUri.toString());
     var uriResponse = await client.post(uri, body: {"data": body});
     print("Response: ${uriResponse.body}");
   }

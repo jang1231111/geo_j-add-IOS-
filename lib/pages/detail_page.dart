@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geo_j/constants/style.dart';
 import 'package:geo_j/models/device/device_logdata_info.dart';
 import 'package:geo_j/models/login/signin_info.dart';
-import 'package:geo_j/providers/device_log_data/device_log_data_provider.dart';
-import 'package:geo_j/providers/device_log_data/device_log_data_state.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class DetailPage extends StatelessWidget {
@@ -75,7 +72,7 @@ class DetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    A10 device = ModalRoute.of(context)!.settings.arguments as A10;
+    // A10 device = ModalRoute.of(context)!.settings.arguments as A10;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,7 +82,8 @@ class DetailHeader extends StatelessWidget {
           style: TextStyle(fontSize: 25.0),
         ),
         Text(
-          'DSIT - ${device.deNumber}',
+          // 'DSIT - ${device.deNumber}',
+          'DSIT - 테스트',
           style: TextStyle(
             fontSize: 15.0,
             color: Color.fromARGB(255, 241, 140, 31),
