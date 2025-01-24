@@ -5,7 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/models/error/custom_error.dart';
 import 'package:geo_j/models/device/device_logdata_info.dart';
 import 'package:geo_j/pages/detail_page.dart';
-import 'package:geo_j/providers/connecting_provider/connecting_provider.dart';
+import 'package:geo_j/providers/connection_provider/connection_provider.dart';
 import 'package:geo_j/providers/device_log_data/device_log_data_provider.dart';
 import 'package:geo_j/providers/signin/signin_provider.dart';
 import 'package:geo_j/utils/convert.dart';
@@ -179,7 +179,7 @@ Future<void> notifyStream(
         await deviceLogDataProvider.sendLogData(
             serial: serial, logDatas: logDatas, devices: devices);
             
-        context.read<ConnectingProvider>().disConnect();
+        context.read<ConnectionProvider>().disConnect();
         Navigator.pushNamed(context, DetailPage.routeName);
       } on CustomError catch (e) {
         print('데이터 전송 실패 : ${e.toString()}');
@@ -191,7 +191,7 @@ Future<void> notifyStream(
       } finally {
         /// 연결 종료
         await device.disconnect();
-        context.read<ConnectingProvider>().disConnect();
+        context.read<ConnectionProvider>().disConnect();
       }
     }
   });

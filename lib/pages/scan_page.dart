@@ -4,7 +4,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/constants/style.dart';
 import 'package:geo_j/models/login/signin_info.dart';
 import 'package:geo_j/pages/signin_page.dart';
-import 'package:geo_j/providers/connecting_provider/connecting_provider.dart';
+import 'package:geo_j/providers/connection_provider/connection_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
 import 'package:geo_j/providers/filtered_devices/filtered_devices_provider.dart';
@@ -204,7 +204,7 @@ class _ShowDevicesState extends State<ShowDevices> {
     Navigator.pushNamed(context, SigninPage.routeName);
   }
 
-  getCurrentLocation() async {
+  void getCurrentLocation() async {
     location.onLocationChanged.listen((loc.LocationData tempcurrentLocation) {
       _locationData = tempcurrentLocation;
 
@@ -229,18 +229,19 @@ class _ShowDevicesState extends State<ShowDevices> {
   }
 
   void scanListener() {
-    var subscription = FlutterBluePlus.onScanResults.listen(
+    var scanSubscription = FlutterBluePlus.onScanResults.listen(
       (results) {
+        if (!mounted) return;
         if (results.isNotEmpty) {
           context
               .read<ScanResultProvider>()
               .updateScanResults(newScanResults: results);
         }
       },
-      onError: (e) => print(e),
+      onError: (e) => print('스캔 오류 발생: $e'),
     );
 
-    FlutterBluePlus.cancelWhenScanComplete(subscription);
+    FlutterBluePlus.cancelWhenScanComplete(scanSubscription);
   }
 
   startUpdateTimer() async {
@@ -335,20 +336,36 @@ class _ShowDevicesState extends State<ShowDevices> {
   Widget build(BuildContext context) {
     final filteredDevices =
         context.watch<FilteredDevicesProvider>().state.filteredDevices;
+    // final bool isConnecting = context.watch<ConnectingProvider>().isConnecting;
 
-    return ListView.separated(
-      primary: false,
-      shrinkWrap: true,
-      itemCount: filteredDevices.length,
-      separatorBuilder: (BuildContext context, int index) {
-        return Divider(
-          color: Colors.grey,
-        );
-      },
-      itemBuilder: (BuildContext context, int index) {
-        return DeviceItem(deNumber: filteredDevices[index].deNumber);
-      },
-    );
+    return
+        // isConnecting
+        //     ? Column(
+        //         children: [
+        //           Center(child: CircularProgressIndicator()),
+        //           SizedBox(height: 20),
+        //           Text('기기를 연결중입니다.')
+        //         ],
+        //       )
+        //     :
+        filteredDevices.isEmpty
+            ? Center(
+                child: Text(
+                  '검색된 기기가 없습니다.',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              )
+            : ListView.separated(
+                primary: false,
+                shrinkWrap: true,
+                itemCount: filteredDevices.length,
+                separatorBuilder: (BuildContext context, int index) {
+                  return Divider(color: Colors.grey);
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return DeviceItem(deNumber: filteredDevices[index].deNumber);
+                },
+              );
   }
 }
 
@@ -359,7 +376,7 @@ class DeviceItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scanResults = context.watch<ScanResultProvider>().state.scanResults;
-    final bool isConnecting = context.watch<ConnectingProvider>().isConnecting;
+    final isConnecting = context.watch<ConnectionProvider>().state.isConnecting;
     final device = context
         .watch<FilteredDevicesProvider>()
         .state
@@ -455,15 +472,19 @@ class DeviceItem extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image(
-                                  image:
-                                      AssetImage('assets/images/temp_ic.png'),
-                                  fit: BoxFit.contain,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.1,
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.1,
-                                ),
+                                isConnecting
+                                    ? CircularProgressIndicator()
+                                    : Image(
+                                        image: AssetImage(
+                                            'assets/images/temp_ic.png'),
+                                        fit: BoxFit.contain,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.1,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.1,
+                                      ),
                                 Container(
                                   padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                                   child: Text(
@@ -525,7 +546,7 @@ class DeviceItem extends StatelessWidget {
                                       if (!isConnecting) {
                                         // isConnecting Flag 수정
                                         context
-                                            .read<ConnectingProvider>()
+                                            .read<ConnectionProvider>()
                                             .connect();
                                         // sendCount 값 수정
                                         context
@@ -585,7 +606,7 @@ class DeviceItem extends StatelessWidget {
                                               await scanResult.device
                                                   .disconnect();
                                               context
-                                                  .read<ConnectingProvider>()
+                                                  .read<ConnectionProvider>()
                                                   .disConnect();
                                               subscription.cancel();
                                             }

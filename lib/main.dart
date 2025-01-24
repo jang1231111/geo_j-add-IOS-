@@ -3,7 +3,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geo_j/pages/detail_page.dart';
 import 'package:geo_j/pages/scan_page.dart';
 import 'package:geo_j/pages/splash_page.dart';
-import 'package:geo_j/providers/connecting_provider/connecting_provider.dart';
+import 'package:geo_j/providers/connection_provider/connection_provider.dart';
 import 'package:geo_j/providers/device_filter/device_filter_provider.dart';
 import 'package:geo_j/providers/device_log_data/device_log_data_provider.dart';
 import 'package:geo_j/providers/device_search/device_search_provider.dart';
@@ -82,8 +82,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<ScanResultProvider>(
           create: (context) => ScanResultProvider(),
         ),
-        ChangeNotifierProvider<ConnectingProvider>(
-          create: (context) => ConnectingProvider(),
+        ChangeNotifierProvider<ConnectionProvider>(
+          create: (context) => ConnectionProvider(),
         ),
         // ProxyProvider<SigninProvider, ActiveShippingCountProvider>(
         //   update: (BuildContext context, SigninProvider signinProvider,
