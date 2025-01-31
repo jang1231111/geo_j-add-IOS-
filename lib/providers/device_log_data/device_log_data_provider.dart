@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_j/models/device/device_logdata_info.dart';
 import 'package:geo_j/models/error/custom_error.dart';
@@ -20,12 +21,23 @@ class DeviceLogDataProvider with ChangeNotifier {
     required List<LogData> logDatas,
     required List<A10> devices,
   }) async {
+    /// 전송 기기
+    A10? a10 = devices.firstWhereOrNull(
+      (device) =>
+          device.deNumber.replaceAll('SENSOR_', '').toLowerCase() ==
+          serial.toLowerCase(),
+    );
+
+    /// 목록에 기기 없는 경우
+    if (a10 == null) {
+      return null;
+    }
+
     try {
-      await logDataRepositories.sendLogData(
-          serial: serial, devices: devices, logDatas: logDatas);
+      await logDataRepositories.sendLogData(a10: a10, logDatas: logDatas);
 
       _state = _state.copyWith(
-          logDatas: logDatas, status: DeviceLogDataStatus.success);
+          a10: a10, logDatas: logDatas, status: DeviceLogDataStatus.success);
       notifyListeners();
     } on CustomError catch (e) {
       _state = _state.copyWith(status: DeviceLogDataStatus.error, error: e);
